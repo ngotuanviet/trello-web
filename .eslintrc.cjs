@@ -22,7 +22,12 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'warn',
     'react/prop-types': 0,
     // mui
-    'no-restricted-imports': ['error', '^@mui/[^/]+$'],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [{ "regex": "^@mui/[^/]+$" }]
+      }
+    ],
     // Common
     'no-console': 1,
     'no-lonely-if': 1,
