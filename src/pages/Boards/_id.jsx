@@ -9,9 +9,11 @@ import { fetchBoardDetailsAPI } from '~/apis'
 function Board() {
   const [board, setBoard] = useState(null)
   useEffect(() => {
-    fetchBoardDetailsAPI('69db21f451a42724aa1274cc').then((data) => {
-      setBoard(data)
+    fetchBoardDetailsAPI('6a4b65841f2db783506bbb9d').then((data) => {
+      setBoard(data.board)
     })
+
+
   }, [])
 
 

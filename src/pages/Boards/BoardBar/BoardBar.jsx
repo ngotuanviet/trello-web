@@ -26,9 +26,7 @@ const MENU_STYLES = {
   },
 }
 function BoardBar({ Board }) {
-  console.log('====================================')
-  console.log(Board)
-  console.log('====================================')
+
   return (
     <>
       <Box
@@ -49,13 +47,15 @@ function BoardBar({ Board }) {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Chip
-            sx={MENU_STYLES}
-            clickable
-            onClick={() => { }}
-            icon={<DashboardIcon />}
-            label={Board?.title}
-          />
+          <Tooltip title={Board?.description}>
+            <Chip
+              sx={MENU_STYLES}
+              clickable
+              onClick={() => { }}
+              icon={<DashboardIcon />}
+              label={Board?.title}
+            />
+          </Tooltip>
           <Chip
             sx={MENU_STYLES}
             clickable
