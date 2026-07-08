@@ -12,7 +12,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <CssBaseline />
       <BrowserRouter>
         <App />
-        <ToastContainer />
       </BrowserRouter>
     </CssVarsProvider>
   </>

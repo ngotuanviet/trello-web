@@ -10,7 +10,6 @@ function Board() {
   const [board, setBoard] = useState(null)
   useEffect(() => {
     fetchBoardDetailsAPI('6a4b65841f2db783506bbb9d').then((data) => {
-
       setBoard(data.board)
     })
 
