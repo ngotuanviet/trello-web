@@ -5,12 +5,14 @@ import { BrowserRouter } from "react-router-dom";
 
 import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material'
 import theme from '~/theme.js'
+import { ToastContainer } from 'react-toastify';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <>
     <CssVarsProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
         <App />
+        <ToastContainer />
       </BrowserRouter>
     </CssVarsProvider>
   </>
