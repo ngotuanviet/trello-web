@@ -5,7 +5,7 @@ import AppBar from '~/components/Appbar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 
-import { fetchBoardDetailsAPI, CreateNewColumnAPI, CreateNewCardAPI } from '~/apis'
+import { fetchBoardDetailsAPI, createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI } from '~/apis'
 import { generatePlaceholderCard } from '../../utils/Formatters.js'
 import { isEmpty } from 'lodash'
 function Board() {
@@ -27,7 +27,7 @@ function Board() {
   // Func này có nhiệm vụ gọi API tạo mới Column và làm lại dữ liệu stare board
   const createNewColumn = async (newColumnData) => {
 
-    const createdColumnResponse = await CreateNewColumnAPI({
+    const createdColumnResponse = await createNewColumnAPI({
       boardId: board?._id,
       ...newColumnData
     })
@@ -40,6 +40,9 @@ function Board() {
     // toàn bo Board du day co là api tạo Column hay Card di chang nữa. => Lúc nay FE se nhan hơn.
     const newBoard = { ...board }
     const createdColumn = createdColumnResponse.createColumn
+    // Gán _id cho column mới được tạo từ response để tránh lỗi unique key prop trong React khi render ListColumns
+    createdColumn._id = createdColumnResponse._id
+
     // SỬA LỖI COLUMN RỖNG: Khi tạo một cột mới hoàn toàn rỗng ở phía client,
     // ta cần tự động gắn một Placeholder Card ẩn vào cột này để dnd-kit nhận diện được nó khi kéo thả.
     createdColumn.cards = [generatePlaceholderCard(createdColumn)]
@@ -51,7 +54,7 @@ function Board() {
   }
   const createNewCard = async (newCardData) => {
 
-    const { createCard } = await CreateNewCardAPI({
+    const { createCard } = await createNewCardAPI({
       boardId: board?._id,
       ...newCardData
     })
@@ -82,12 +85,24 @@ function Board() {
     // Lưu ý: cách làm này phụ thuộc vào tùy lựa chọn và đặc thù dự án, có nơi thì BE sẽ hỗ trợ trả về luôn
     // toan bộ Board du day co la api tạo Column hay Card di chang nua. > Luc nay FE se nhan hon.
   }
+  // Func gọi API và xử lý kéo thả Column
+  const moveColumns = async (dndOrderedColumns) => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map((c) => c._id)
+    const newBoard = { ...board }
+    newBoard.columns = dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
 
+    // Gọi Api Update Board
+    setBoard(newBoard)
+    await updateBoardDetailsAPI(newBoard._id, {
+      columnOrderIds: newBoard.columnOrderIds
+    })
+  }
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar />
       <BoardBar Board={board} />
-      <BoardContent Board={board} createNewCard={createNewCard} createNewColumn={createNewColumn} />
+      <BoardContent Board={board} moveColumns={moveColumns} createNewCard={createNewCard} createNewColumn={createNewColumn} />
     </Container>
   )
 }

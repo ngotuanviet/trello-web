@@ -22,7 +22,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD',
 }
-function BoardContent({ Board, createNewColumn, createNewCard }) {
+function BoardContent({ Board, createNewColumn, createNewCard, moveColumns }) {
 
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event. fix trường hợp click bị gọi event
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -37,24 +37,24 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
   const [activeDragItemId, setActiveDragItemId] = useState(null)
   const [activeDragItemType, setActiveDragItemType] = useState(null)
   const [activeDragItemData, setActiveDragItemData] = useState(null)
-  
+
   // Ref để lưu giá trị overId cuối cùng khi kéo thả, tránh hiện tượng giật lag/flicker
   const lastOverId = useRef(null)
 
   useEffect(() => {
     setOrderedColumns(mapOrder(Board?.columns, Board?.columnOrderIds, '_id'))
   }, [Board])
-  
+
   const findColumnByCardId = (cardId) => {
     // Tìm column chứa card có id là cardId
     return orderedColumns.find(c => c.cards?.map(cd => cd._id)?.includes(cardId))
   }
-  
+
   // Trigger khi bắt đầu hành động kéo (drag start)
   const handleDragStart = (e) => {
     const activeData = e?.active?.data?.current
     if (!activeData) return
-    
+
     // Xác định kiểu đối tượng đang kéo (Column hay Card)
     const dragItemType =
       activeData.type ||
@@ -66,11 +66,11 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
     setActiveDragItemData(
       dragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN ? activeData.column : activeData.card
     )
-    
+
     // Xóa giá trị overId cũ để chuẩn bị cho quá trình phát hiện va chạm mới
     lastOverId.current = null
   }
-  
+
   // Thuật toán phát hiện va chạm tùy chỉnh (custom collision detection strategy) để sửa lỗi kéo thả Card vào Column rỗng.
   // Nếu dùng thuật toán mặc định như closestCorners, khi kéo Card qua một Column rỗng, nó sẽ không thể nhận diện được Column đó
   // do cột rỗng không có card con để tính toán khoảng cách góc.
@@ -82,7 +82,7 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
 
     // 2. Tìm các va chạm (collisions) dựa vào vị trí con trỏ chuột (pointer coordinates)
     const pointerCollisions = pointerWithin(args)
-    
+
     // 3. Nếu con trỏ chuột không va chạm với bất kỳ vùng droppable nào (ví dụ kéo card ra ngoài rìa board, ngoài màn hình):
     // Ta trả về vùng va chạm cuối cùng đã được lưu (lastOverId) để tránh hiện tượng card bị giật lag hoặc tự động nhảy ngược lại.
     if (!pointerCollisions?.length) {
@@ -97,7 +97,7 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
     if (overId) {
       // 5. Kiểm tra xem overId này có phải là một Column hay không
       const checkColumn = orderedColumns.find(c => c._id === overId)
-      
+
       if (checkColumn) {
         // 6. Nếu overId là một Column (tức là chuột đang đè lên Column hoặc Column rỗng):
         // Ta sẽ chạy thuật toán closestCorners đối với các card con nằm bên trong Column đó.
@@ -109,7 +109,7 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
             container => container.id !== overId && checkColumn.cardOrderIds?.includes(container.id)
           )
         })
-        
+
         // 7. Nếu sau khi lọc và tính toán lại không tìm thấy card con nào (ví dụ: cột đó thực sự rỗng hoặc chỉ có card placeholder ẩn),
         // ta sẽ trả về chính ID của Column rỗng đó để làm đích đến cho Card được thả vào.
         if (collisions.length === 0) {
@@ -186,10 +186,19 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
 
       // Dùng arrayMove cua thang dnd-kit đe sap xep lại mang Columns ban đầu
       // Code cua arrayMove o day: dnd-kit/paciges/sortable/src/utilities/arrayMove.ts
-      const dndOrderedColumnsIds = dndOrderedColumns.map((c) => c._id)
-      // 2 cái console. log du lieu nay sau dùng de xử ly gọi API
-      // console.log('dndOrderedColumns: ', dndOrderedColumns)
-      // console.log('dndOrderedColumnsIds: ', dndOrderedColumnsIds)
+
+
+
+      //         / **
+      // * Goi lên props function movrColumns nam o component cha cao nhat(boards / _id.jsx)
+      //         * Lưu ý: Về sau ở học phần MERN Stack Advance nắng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
+      // dưa dữ liệu Board ra ngoài Redux Global Store,
+      // * và lúc này chúng ta có thế gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
+      // component cha phía ben tren. (Đoi voi component con nam cang sau thì cang kho : D)
+      //         * - Với việc sử dụng Redux như vậy thì code se Clean chuan chinh hơn rat nhiều.
+      moveColumns(dndOrderedColumns)
+      // Vẫn gọi update State ở đây đề tránh delay hoặc Flickering giao diện lúc kéo thả cần phải chờ
+
       setOrderedColumns(dndOrderedColumns)
 
     }
@@ -222,7 +231,7 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
 
     // Tìm cột chứa Card đang được kéo (activeColumn)
     const activeColumn = findColumnByCardId(activeDragCardId)
-    
+
     // Tìm cột chứa đối tượng mà chuột đang đè lên (overColumn)
     let overColumn = findColumnByCardId(overCardId)
     // SỬA LỖI COLUMN RỖNG: Nếu không tìm thấy cột dựa vào ID của Card dưới chuột (ví dụ chuột đang đè trực tiếp lên cột rỗng),
@@ -243,7 +252,7 @@ function BoardContent({ Board, createNewColumn, createNewCard }) {
 
         // 1. Xóa Card đang kéo ra khỏi danh sách cards của cột cũ (nextActiveColumn)
         nextActiveColumn.cards = nextActiveColumn.cards.filter(cd => cd._id !== activeDragCardId)
-        
+
         // SỬA LỖI COLUMN RỖNG: Nếu cột cũ sau khi bỏ card đi trở thành cột rỗng, 
         // ta tự động thêm một Placeholder Card ẩn vào để dnd-kit vẫn nhận diện cột này là vùng có thể kéo thả vào được.
         if (nextActiveColumn.cards.length === 0) {

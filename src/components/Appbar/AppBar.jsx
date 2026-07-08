@@ -101,7 +101,7 @@ function AppBar() {
                 </InputAdornment>
               ),
               endAdornment: (
-                <InputAdornment>
+                <InputAdornment position="end">
                   <CloseIcon
                     onClick={() => setSearchValue('')}
                     fontSize="small"
