@@ -5,7 +5,7 @@ import AppBar from '~/components/Appbar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
 
-import { fetchBoardDetailsAPI } from '~/apis'
+import { fetchBoardDetailsAPI, CreateNewColumnAPI, CreateNewCardAPI } from '~/apis'
 function Board() {
   const [board, setBoard] = useState(null)
   useEffect(() => {
@@ -15,13 +15,32 @@ function Board() {
 
 
   }, [])
+  // Func này có nhiệm vụ gọi API tạo mới Column và làm lại dữ liệu stare board
+  const createNewColumn = async (newColumnData) => {
 
+    const createdColumn = await CreateNewColumnAPI({
+      boardId: board?._id,
+      ...newColumnData
+    })
+    // cập nhật lại state board
+
+  }
+  const createNewCard = async (newCardData) => {
+
+    const createdCard = await CreateNewCardAPI({
+      boardId: board?._id,
+      ...newCardData
+    })
+
+    // cập nhật lại state board
+
+  }
 
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar />
       <BoardBar Board={board} />
-      <BoardContent Board={board} />
+      <BoardContent Board={board} createNewCard={createNewCard} createNewColumn={createNewColumn} />
     </Container>
   )
 }

@@ -2,15 +2,14 @@ import Box from '@mui/material/Box'
 import ListColumns from './ListColumns/ListColumns'
 import {
   DndContext,
-  PointerSensor,
   useSensor,
   useSensors,
-  MouseSensor,
-  TouchSensor,
+
   DragOverlay,
   defaultDropAnimationSideEffects,
   closestCorners
 } from '@dnd-kit/core'
+import { MouseSensor, PointerSensor, TouchSensor } from '../../../customLibraties/DndkitSensors'
 import { cloneDeep } from 'lodash'
 import { mapOrder } from '~/utils/sorts'
 import { arrayMove } from '@dnd-kit/sortable'
@@ -21,7 +20,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD',
 }
-function BoardContent({ Board }) {
+function BoardContent({ Board, createNewColumn, createNewCard }) {
 
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event. fix trường hợp click bị gọi event
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -195,7 +194,7 @@ function BoardContent({ Board }) {
             p: '10px 0',
           }}
         >
-          <ListColumns columns={orderedColumns} />
+          <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} />
           <DragOverlay dropAnimation={dropAnimation}>
             {(!activeDragItemType) && null}
             {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData} />}
@@ -208,3 +207,5 @@ function BoardContent({ Board }) {
 }
 
 export default BoardContent
+
+
