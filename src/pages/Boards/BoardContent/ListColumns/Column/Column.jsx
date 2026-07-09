@@ -45,12 +45,12 @@ function Column({ column, createNewCard }) {
   }
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
-  const handleAddNewCard = async () => {
+  const handleAddNewCard = () => {
     const newDataCard = {
       title: cardTitleNew,
       columnId: column._id
     }
-    await createNewCard(newDataCard)
+    createNewCard(newDataCard)
     setToggleNewCard(false)
     setCardTitleNew('')
   }
@@ -71,6 +71,8 @@ function Column({ column, createNewCard }) {
         sx={{
           minWidth: '300px',
           minHeight: '300px',
+          overflowY: 'scroll',
+          scrollbarWidth: 'none',
           bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333643' : '#ebecf0'),
           ml: 2,
           borderRadius: '6px',
@@ -84,6 +86,7 @@ function Column({ column, createNewCard }) {
           sx={{
             height: (theme) => theme.trelloCustom.columnHeaderHeight,
             p: 2,
+
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',

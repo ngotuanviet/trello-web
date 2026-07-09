@@ -12,11 +12,11 @@ function ListColumns({ columns, createNewColumn, createNewCard }) {
   /**
    * Thằng SortableContext yêu cầu items là một mảng dạng ['id1', 'id2'] chứ không phải [{id: 'id-1},{id: 'id-2}]
    */
-  const handleAddNewColumn = async () => {
+  const handleAddNewColumn = () => {
     const dataNewColumn = {
       title: columnTitleNew
     }
-    await createNewColumn(dataNewColumn)
+    createNewColumn(dataNewColumn)
     setToggleNewColumn(false)
     setColumnTitleNew('')
   }
@@ -40,7 +40,10 @@ function ListColumns({ columns, createNewColumn, createNewCard }) {
       >
         {/* Column */}
         {columns?.map((column) => (
-          <Column key={column._id} column={column} createNewCard={createNewCard} />
+          <>
+
+            <Column key={column._id} column={column} createNewCard={createNewCard} /></>
+
         ))}
 
         <Box
