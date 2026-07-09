@@ -8,7 +8,7 @@ import { mapOrder } from '~/utils/sorts'
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
-import { fetchBoardDetailsAPI, createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI, updateColumnDetailsAPI } from '~/apis'
+import { fetchBoardDetailsAPI, createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI } from '~/apis'
 import { generatePlaceholderCard } from '../../utils/Formatters.js'
 import { isEmpty } from 'lodash'
 import Typography from '@mui/material/Typography'
@@ -147,7 +147,7 @@ function Board() {
     if (prevCardOrderIds[0]?.includes('-placeholder-card')) prevCardOrderIds = []
     if (nextCardOrderIds[0]?.includes('-placeholder-card')) nextCardOrderIds = []
 
-    updateBoardDetailsAPI(newBoard._id, {
+    moveCardToDifferentColumnsAPI({
       currentCardId,
       prevColumnId,
       nextColumnId,
