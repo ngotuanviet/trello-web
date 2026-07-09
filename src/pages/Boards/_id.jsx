@@ -68,7 +68,7 @@ function Board() {
       ...newCardData
     })
     const newBoard = { ...board }
-    console.log(createCard);
+
 
 
     const columnToUpdate = newBoard.columns.find((column) => column._id === createCard.columnId)
@@ -85,9 +85,7 @@ function Board() {
         columnToUpdate.cardOrderIds.push(createCard._id)
       }
     }
-    console.log('====================================');
-    console.log(columnToUpdate);
-    console.log('====================================');
+
     setBoard(newBoard)
     // cập nhật lại state board
     // Phiay ront-end chung ta phai tự lam dung lai state data board (thay vi phải gọi lai api fetchBoardDetailsAPI)

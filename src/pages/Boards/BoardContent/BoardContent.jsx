@@ -177,6 +177,14 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
         }
       } else {
         // Kéo thả giữa 2 Column khác nhau
+        // Cập nhật columnId của card cho đúng với column mới trong orderedColumns
+        const targetColumn = orderedColumns.find(c => c._id === overColumn._id)
+        if (targetColumn) {
+          const targetCard = targetColumn.cards.find(c => c._id === active.id)
+          if (targetCard) {
+            targetCard.columnId = overColumn._id
+          }
+        }
         moveCardToDifferentColumns(active.id, prevColumnId, overColumn._id, orderedColumns)
       }
 
@@ -293,7 +301,8 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
 
         // 4. Thêm Card mới kéo vào vị trí vừa tính toán trong cột đích
         nextOverColumn.cards = nextOverColumn.cards.filter(cd => cd._id !== activeDragCardId)
-        nextOverColumn.cards = nextOverColumn.cards.toSpliced(newCardIndex, 0, activeDraggingCardData)
+        
+        nextOverColumn.cards.splice(newCardIndex, 0, activeDraggingCardData)
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
 
         return nextColumns
