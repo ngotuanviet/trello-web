@@ -21,7 +21,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD',
 }
-function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn, moveCardToDifferentColumns }) {
+function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn, moveCardToDifferentColumns, deleteColumnDetails }) {
 
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event. fix trường hợp click bị gọi event
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -301,7 +301,7 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
 
         // 4. Thêm Card mới kéo vào vị trí vừa tính toán trong cột đích
         nextOverColumn.cards = nextOverColumn.cards.filter(cd => cd._id !== activeDragCardId)
-        
+
         nextOverColumn.cards.splice(newCardIndex, 0, activeDraggingCardData)
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
 
@@ -330,7 +330,7 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
             p: '10px 0',
           }}
         >
-          <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} moveCardInTheSameColumn={moveCardInTheSameColumn} />
+          <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} moveCardInTheSameColumn={moveCardInTheSameColumn} deleteColumnDetails={deleteColumnDetails} />
           <DragOverlay dropAnimation={dropAnimation}>
             {(!activeDragItemType) && null}
             {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData} />}

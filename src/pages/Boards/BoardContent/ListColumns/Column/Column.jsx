@@ -23,10 +23,15 @@ import { CSS } from '@dnd-kit/utilities'
 
 import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
+import { ConfirmProvider, useConfirm } from 'material-ui-confirm'
+import { toast } from 'react-toastify'
 
-function Column({ column, createNewCard }) {
+function Column({ column, createNewCard, deleteColumnDetails }) {
+  const confirmDeleteColumn = useConfirm()
+
   const [toggleNewCard, setToggleNewCard] = useState(false)
   const [cardTitleNew, setCardTitleNew] = useState('')
+
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { type: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN', column },
@@ -59,6 +64,33 @@ function Column({ column, createNewCard }) {
   }
   const handleClose = () => {
     setAnchorEl(null)
+  }
+  const handleDeleteColumn = async () => {
+    // xử lý xoá 1 column và cards bên trong nó
+
+    try {
+      const { confirmed, reason } = await confirmDeleteColumn({
+        title: `Bạn chắc chắn muốn xoá cột tên ${column.title} không?`,
+        description: "Nếu bạn xoá cột này thì các dữ liệu bên trong column sẽ bị xoá toàn bộ",
+        confirmationText: 'Đồng ý',
+        cancellationText: 'Huỷ',
+        // dialogProps: { maxWidth: 'xs' },
+        // allowClose: false,
+        // confirmationButtonProps: { color: 'secondary', variant: 'outlined' },
+        // cancellationButtonProps: { color: 'inherit' },
+
+      });
+
+
+      if (confirmed) {
+
+
+        deleteColumnDetails(column._id)
+      }
+
+    } catch (error) {
+      toast.error('Lỗi xoá cột!')
+    }
   }
   const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
   return (
@@ -122,15 +154,25 @@ function Column({ column, createNewCard }) {
               anchorEl={anchorEl}
               open={open}
               onClose={handleClose}
+              onClick={handleClose}
               slotProps={{
                 list: {
                   'aria-labelledby': 'basic-column-dropdown',
                 },
               }}
             >
-              <MenuItem>
+              <MenuItem
+                onClick={() => setToggleNewCard(!toggleNewCard)}
+                sx={{
+                  ':hover': {
+                    color: 'success.light',
+                    '& .add-forever-icon': {
+                      color: 'success.light',
+                    }
+                  }
+                }}>
                 <ListItemIcon>
-                  <AddCartIcon fontSize="small" />
+                  <AddCartIcon className='add-forever-icon' fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Add New Card</ListItemText>
               </MenuItem>
@@ -153,18 +195,29 @@ function Column({ column, createNewCard }) {
                 <ListItemText>Paste</ListItemText>
               </MenuItem>
               <Divider />
+
+              <MenuItem sx={{
+                ':hover': {
+                  color: 'warning.dark',
+                  '& .delete-forever-icon': {
+                    color: 'warning.dark',
+                  }
+                }
+              }} onClick={handleDeleteColumn}>
+                <ListItemIcon>
+                  <DeleteOutlineIcon className='delete-forever-icon' fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Remove this column</ListItemText>
+              </MenuItem>
+
+
               <MenuItem>
                 <ListItemIcon>
                   <Cloud fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Archive this column</ListItemText>
               </MenuItem>
-              <MenuItem>
-                <ListItemIcon>
-                  <DeleteOutlineIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Remove this column</ListItemText>
-              </MenuItem>
+
             </Menu>
           </Box>
         </Box>

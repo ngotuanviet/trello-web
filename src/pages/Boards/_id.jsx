@@ -8,10 +8,11 @@ import { mapOrder } from '~/utils/sorts'
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
-import { fetchBoardDetailsAPI, createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI } from '~/apis'
+import { fetchBoardDetailsAPI, createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI, deleteColumnDetailAPI } from '~/apis'
 import { generatePlaceholderCard } from '../../utils/Formatters.js'
 import { isEmpty } from 'lodash'
 import Typography from '@mui/material/Typography'
+import { toast } from 'react-toastify'
 function Board() {
   const [board, setBoard] = useState(null)
   useEffect(() => {
@@ -153,7 +154,21 @@ function Board() {
       nextCardOrderIds
     })
   }
+  const deleteColumnDetails = async (columnId) => {
 
+    const newBoard = { ...board }
+
+    newBoard.columns = board.columns.filter((c) => c._id !== columnId)
+    setBoard(newBoard)
+    const { result } = await deleteColumnDetailAPI(columnId)
+    if (result.StatusCode === 200) {
+      toast.success(result.deleteResult)
+    } else {
+      toast.error('Lỗi không xoá đọc column')
+    }
+
+
+  }
   if (!board) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100vw', height: '100vh' }}>
@@ -173,6 +188,7 @@ function Board() {
         moveColumns={moveColumns}
         createNewCard={createNewCard}
         createNewColumn={createNewColumn}
+        deleteColumnDetails={deleteColumnDetails}
       />
     </Container>
   )

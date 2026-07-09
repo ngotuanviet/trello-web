@@ -6,7 +6,8 @@ import Button from '@mui/material/Button'
 import AddIcon from '@mui/icons-material/Add'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
-function ListColumns({ columns, createNewColumn, createNewCard }) {
+import { ConfirmProvider } from 'material-ui-confirm'
+function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDetails }) {
   const [toggleNewColumn, setToggleNewColumn] = useState(false)
   const [columnTitleNew, setColumnTitleNew] = useState('')
   /**
@@ -39,10 +40,13 @@ function ListColumns({ columns, createNewColumn, createNewCard }) {
         }}
       >
         {/* Column */}
+
         {columns?.map((column) => (
           <>
 
-            <Column key={column._id} column={column} createNewCard={createNewCard} /></>
+            <Column key={column._id} column={column} createNewCard={createNewCard} deleteColumnDetails={deleteColumnDetails} /></>
+
+
 
         ))}
 
