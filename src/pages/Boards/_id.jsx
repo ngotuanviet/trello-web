@@ -123,8 +123,39 @@ function Board() {
 
     setBoard(newBoard)
     updateColumnDetailsAPI(columnId, { cardOrderIds: dndOrderedCardIds })
-
   }
+
+  /**
+   * Khi di chuyển card sang column khác:
+   * 1. Cập nhật mảng cardOrderIds của column cũ (xóa cardId)
+   * 2. Cập nhật mảng cardOrderIds của column mới (thêm cardId)
+   * 3. Cập nhật columnId của card đã kéo
+   * => API chỉ cần gọi một lần ở Board (updateBoardDetailsAPI)
+   */
+  const moveCardToDifferentColumns = (currentCardId, prevColumnId, nextColumnId, dndOrderedColumns) => {
+    const dndOrderedColumnsIds = dndOrderedColumns.map((c) => c._id)
+    const newBoard = { ...board }
+    newBoard.columns = dndOrderedColumns
+    newBoard.columnOrderIds = dndOrderedColumnsIds
+    setBoard(newBoard)
+
+    // Gọi API để cập nhật vị trí card trên DB
+    let prevCardOrderIds = dndOrderedColumns.find(c => c._id === prevColumnId)?.cardOrderIds || []
+    let nextCardOrderIds = dndOrderedColumns.find(c => c._id === nextColumnId)?.cardOrderIds || []
+
+    // Lọc bỏ placeholder card nếu có
+    if (prevCardOrderIds[0]?.includes('-placeholder-card')) prevCardOrderIds = []
+    if (nextCardOrderIds[0]?.includes('-placeholder-card')) nextCardOrderIds = []
+
+    updateBoardDetailsAPI(newBoard._id, {
+      currentCardId,
+      prevColumnId,
+      nextColumnId,
+      prevCardOrderIds,
+      nextCardOrderIds
+    })
+  }
+
   if (!board) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100vw', height: '100vh' }}>
@@ -137,7 +168,14 @@ function Board() {
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar />
       <BoardBar Board={board} />
-      <BoardContent moveCardInTheSameColumn={moveCardInTheSameColumn} Board={board} moveColumns={moveColumns} createNewCard={createNewCard} createNewColumn={createNewColumn} />
+      <BoardContent
+        moveCardInTheSameColumn={moveCardInTheSameColumn}
+        moveCardToDifferentColumns={moveCardToDifferentColumns}
+        Board={board}
+        moveColumns={moveColumns}
+        createNewCard={createNewCard}
+        createNewColumn={createNewColumn}
+      />
     </Container>
   )
 }

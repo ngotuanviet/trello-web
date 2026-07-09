@@ -21,7 +21,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD',
 }
-function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn }) {
+function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn, moveCardToDifferentColumns }) {
 
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event. fix trường hợp click bị gọi event
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -72,8 +72,6 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
   }
 
   // Thuật toán phát hiện va chạm tùy chỉnh (custom collision detection strategy) để sửa lỗi kéo thả Card vào Column rỗng.
-  // Nếu dùng thuật toán mặc định như closestCorners, khi kéo Card qua một Column rỗng, nó sẽ không thể nhận diện được Column đó
-  // do cột rỗng không có card con để tính toán khoảng cách góc.
   const collisionDetectionStrategy = useCallback((args) => {
     // 1. Nếu đang kéo Column (thay vì Card), ta tiếp tục dùng thuật toán closestCorners tiêu chuẩn để sắp xếp các cột.
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
@@ -144,43 +142,42 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
       if (!overColumn) {
         overColumn = orderedColumns.find(c => c._id === over.id)
       }
+
+      if (!activeColumn || !overColumn) return
+
       let dndOrderedCardIds = []
       let dndOrderedCards = []
-      // Chỉ xử lý sắp xếp lại nếu kéo thả Card trong cùng một cột
-      // (Việc chuyển Card sang cột khác đã được xử lý thời gian thực ở handleDragOver)
-      if (activeColumn && overColumn && activeColumn._id === overColumn._id) {
-        // Vẫn gọi update state ở đây để tránh delay hoặc Flickering giao diện lúc kéo thả cần phải chờ gọi API
-        setOrderedColumns((prev) => {
-          const nextColumns = cloneDeep(prev)
-          const targetColumn = nextColumns.find(c => c._id === activeColumn._id)
-          if (!targetColumn) return prev
 
-          // Tìm vị trí index cũ và vị trí index mới của Card
-          const oldIndex = targetColumn.cards.findIndex(c => c._id === active.id)
-          const newIndex = targetColumn.cards.findIndex(c => c._id === over.id)
-          if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return prev
+      // Phải dùng activeDragItemData.columnId để biết cột ban đầu (trước khi kéo)
+      const prevColumnId = activeDragItemData.columnId
 
-          // Sắp xếp lại thứ tự các Card trong mảng
-          targetColumn.cards = arrayMove(targetColumn.cards, oldIndex, newIndex)
-          targetColumn.cardOrderIds = targetColumn.cards.map(c => c._id)
-          dndOrderedCardIds = [...targetColumn.cardOrderIds]
-          dndOrderedCards = [...targetColumn.cards]
-          return nextColumns
+      if (prevColumnId === overColumn._id) {
+        // Chỉ xử lý sắp xếp lại nếu kéo thả Card trong cùng một cột
+        if (activeColumn && overColumn && activeColumn._id === overColumn._id) {
+          // Vẫn gọi update state ở đây để tránh delay hoặc Flickering giao diện lúc kéo thả cần phải chờ gọi API
+          setOrderedColumns((prev) => {
+            const nextColumns = cloneDeep(prev)
+            const targetColumn = nextColumns.find(c => c._id === activeColumn._id)
+            if (!targetColumn) return prev
+
+            // Tìm vị trí index cũ và vị trí index mới của Card
+            const oldIndex = targetColumn.cards.findIndex(c => c._id === active.id)
+            const newIndex = targetColumn.cards.findIndex(c => c._id === over.id)
+            if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return prev
+
+            // Sắp xếp lại thứ tự các Card trong mảng
+            targetColumn.cards = arrayMove(targetColumn.cards, oldIndex, newIndex)
+            targetColumn.cardOrderIds = targetColumn.cards.map(c => c._id)
+            dndOrderedCardIds = [...targetColumn.cardOrderIds]
+            dndOrderedCards = [...targetColumn.cards]
+            return nextColumns
+          })
+
+          moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardIds, activeColumn._id)
         }
-
-
-        )
-        /**
-         *  Gọi lên props function moveCardInSameColumn nam o component cha cao nhat(boards / _id.jsx)
-        * Lưu ý: Về sau ở học phần MERN Stack Advance nang cao học trực tiep minh se voi minh thì chung ta sẽ dưa
-dữ liệu Board ra ngoài Redux Global Store,
-* và lúc này chúng ta có thể gọi luôn API ở đầy là xong thay vì phải lần lượt gọi ngược lên những
-component cha phia ben tren. (Đoi voi component con nam cang sau thi cang kho : D)
-        * - Với việc sử dụng Redux như vậy thì code se Clean chuan chinh hon rat nhieu.
-         */
-
-
-        moveCardInTheSameColumn(dndOrderedCards, dndOrderedCardIds, activeColumn._id)
+      } else {
+        // Kéo thả giữa 2 Column khác nhau
+        moveCardToDifferentColumns(active.id, prevColumnId, overColumn._id, orderedColumns)
       }
 
       setActiveDragItemId(null)
