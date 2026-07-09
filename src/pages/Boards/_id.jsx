@@ -159,7 +159,6 @@ function Board() {
     const newBoard = { ...board }
 
     newBoard.columns = board.columns.filter((c) => c._id !== columnId)
-    setBoard(newBoard)
     const { result } = await deleteColumnDetailAPI(columnId)
     if (result.StatusCode === 200) {
       toast.success(result.deleteResult)
@@ -167,7 +166,7 @@ function Board() {
       toast.error('Lỗi không xoá đọc column')
     }
 
-
+    setBoard(newBoard)
   }
   if (!board) {
     return (
