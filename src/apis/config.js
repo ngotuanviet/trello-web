@@ -1,5 +1,8 @@
 import axios from "axios";
+import { API_ROOT } from "~/utils/constants";
+
+
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3000'
+  baseURL: API_ROOT
 })
