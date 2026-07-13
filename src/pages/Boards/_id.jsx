@@ -10,30 +10,34 @@ import Box from '@mui/material/Box';
 
 import { fetchBoardDetailsAPI, createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI, deleteColumnDetailAPI } from '~/apis'
 import { generatePlaceholderCard } from '../../utils/Formatters.js'
-import { isEmpty } from 'lodash'
 import Typography from '@mui/material/Typography'
 import { toast } from 'react-toastify'
+import { useDispatch, useSelector } from 'react-redux'
 function Board() {
-  const [board, setBoard] = useState(null)
+  // const [board, setBoard] = useState(null)
+  const dispatch = useDispatch()
+  const board = useSelector((state) => state.activeBoard.currentActiveBoard)
   useEffect(() => {
-    fetchBoardDetailsAPI('6a4b65841f2db783506bbb9d').then((data) => {
-      const board = data.board
-      // Sắp xếp thứ tự các column luôn ở đây trước khi đưa dữ Liệu xuống bên dưới các component con
-      board.columns = mapOrder(board?.columns, board?.columnOrderIds, '_id')
 
-      board.columns.forEach(column => {
-        // SỬA LỖI COLUMN RỖNG: Khi tải dữ liệu board từ API về, nếu một column không có card nào,
-        // ta cần khởi tạo cho nó một placeholder card ẩn để dnd-kit có thể nhận diện và cho phép thả card vào cột này.
-        if (isEmpty(column.cards)) {
-          column.cards = [generatePlaceholderCard(column)]
-          column.cardOrderIds = [generatePlaceholderCard(column)._id]
-        } else {
-          // Sắp xếp thứ tự các cards luôn ở đây trước khi đưa dữ Liệu xuống bên dưới các component con
-          column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
-        }
-      })
-      setBoard(board)
-    })
+    dispatch(fetchBoardDetailsAPI('6a4b65841f2db783506bbb9d'))
+    // fetchBoardDetailsAPI('6a4b65841f2db783506bbb9d').then((data) => {
+    //   const board = data.board
+    //   // Sắp xếp thứ tự các column luôn ở đây trước khi đưa dữ Liệu xuống bên dưới các component con
+    //   board.columns = mapOrder(board?.columns, board?.columnOrderIds, '_id')
+
+    //   board.columns.forEach(column => {
+    //     // SỬA LỖI COLUMN RỖNG: Khi tải dữ liệu board từ API về, nếu một column không có card nào,
+    //     // ta cần khởi tạo cho nó một placeholder card ẩn để dnd-kit có thể nhận diện và cho phép thả card vào cột này.
+    //     if (isEmpty(column.cards)) {
+    //       column.cards = [generatePlaceholderCard(column)]
+    //       column.cardOrderIds = [generatePlaceholderCard(column)._id]
+    //     } else {
+    //       // Sắp xếp thứ tự các cards luôn ở đây trước khi đưa dữ Liệu xuống bên dưới các component con
+    //       column.cards = mapOrder(column.cards, column.cardOrderIds, '_id')
+    //     }
+    //   })
+    //   setBoard(board)
+    // })
   }, [])
   // Func này có nhiệm vụ gọi API tạo mới Column và làm lại dữ liệu stare board
   const createNewColumn = async (newColumnData) => {
