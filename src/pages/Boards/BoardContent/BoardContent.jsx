@@ -21,7 +21,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DRAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DRAG_ITEM_TYPE_CARD',
 }
-function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, moveCardInTheSameColumn, moveCardToDifferentColumns, deleteColumnDetails }) {
+function BoardContent({ Board, moveColumns, moveCardInTheSameColumn, moveCardToDifferentColumns }) {
 
   // Yêu cầu chuột di chuyển 10px thì mới kích hoạt event. fix trường hợp click bị gọi event
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
@@ -178,14 +178,20 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
       } else {
         // Kéo thả giữa 2 Column khác nhau
         // Cập nhật columnId của card cho đúng với column mới trong orderedColumns
-        const targetColumn = orderedColumns.find(c => c._id === overColumn._id)
+
+        // LỖI: Nếu mutate trực tiếp targetCard.columnId ở đây sẽ bị lỗi "TypeError: Cannot assign to read only property 'columnId'"
+        // vì React state (ở đây là orderedColumns được gán từ Board.columns) hoặc dữ liệu từ props có thể đã bị đóng băng (frozen) / read-only.
+        // FIX: Sử dụng cloneDeep để nhân bản toàn bộ orderedColumns thành một mảng hoàn toàn mới, sau đó mới cập nhật thuộc tính columnId.
+        const nextColumns = cloneDeep(orderedColumns)
+        const targetColumn = nextColumns.find(c => c._id === overColumn._id)
         if (targetColumn) {
           const targetCard = targetColumn.cards.find(c => c._id === active.id)
           if (targetCard) {
             targetCard.columnId = overColumn._id
           }
         }
-        moveCardToDifferentColumns(active.id, prevColumnId, overColumn._id, orderedColumns)
+        setOrderedColumns(nextColumns)
+        moveCardToDifferentColumns(active.id, prevColumnId, overColumn._id, nextColumns)
       }
 
       setActiveDragItemId(null)
@@ -214,13 +220,16 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
 
       setOrderedColumns(dndOrderedColumns)
 
-      //         / **
-      // * Goi lên props function movrColumns nam o component cha cao nhat(boards / _id.jsx)
-      //         * Lưu ý: Về sau ở học phần MERN Stack Advance nắng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
-      // dưa dữ liệu Board ra ngoài Redux Global Store,
-      // * và lúc này chúng ta có thế gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
-      // component cha phía ben tren. (Đoi voi component con nam cang sau thì cang kho : D)
-      //         * - Với việc sử dụng Redux như vậy thì code se Clean chuan chinh hơn rat nhiều.
+      /**
+       *  Goi lên props function movrColumns nam o component cha cao nhat(boards / _id.jsx)
+             * Lưu ý: Về sau ở học phần MERN Stack Advance nắng cao học trực tiếp mình sẽ với mình thì chúng ta sẽ
+     dưa dữ liệu Board ra ngoài Redux Global Store,
+     và lúc này chúng ta có thế gọi luôn API ở đây là xong thay vì phải lần lượt gọi ngược lên những
+    component cha phía ben tren. (Đoi voi component con nam cang sau thì cang kho : D)
+             *- Với việc sử dụng Redux như vậy thì code se Clean chuan chinh hơn rat nhiều.
+  
+       */
+
       moveColumns(dndOrderedColumns)
 
 
@@ -302,7 +311,8 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
         // 4. Thêm Card mới kéo vào vị trí vừa tính toán trong cột đích
         nextOverColumn.cards = nextOverColumn.cards.filter(cd => cd._id !== activeDragCardId)
 
-        nextOverColumn.cards.splice(newCardIndex, 0, activeDraggingCardData)
+        // FIX: Phải dùng cloneDeep(activeDraggingCardData) để tránh việc chèn trực tiếp object tham chiếu từ dnd-kit (vốn là read-only) vào state.
+        nextOverColumn.cards.splice(newCardIndex, 0, cloneDeep(activeDraggingCardData))
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
 
         return nextColumns
@@ -330,7 +340,7 @@ function BoardContent({ Board, createNewColumn, createNewCard, moveColumns, move
             p: '10px 0',
           }}
         >
-          <ListColumns columns={orderedColumns} createNewColumn={createNewColumn} createNewCard={createNewCard} moveCardInTheSameColumn={moveCardInTheSameColumn} deleteColumnDetails={deleteColumnDetails} />
+          <ListColumns key={Board._id} columns={orderedColumns} moveCardInTheSameColumn={moveCardInTheSameColumn} />
           <DragOverlay dropAnimation={dropAnimation}>
             {(!activeDragItemType) && null}
             {(activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) && <Column column={activeDragItemData} />}

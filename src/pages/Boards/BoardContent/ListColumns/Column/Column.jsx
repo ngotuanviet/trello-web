@@ -25,10 +25,15 @@ import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
 import { ConfirmProvider, useConfirm } from 'material-ui-confirm'
 import { toast } from 'react-toastify'
+import { createNewCardAPI, deleteColumnDetailAPI } from '~/apis'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { cloneDeep } from 'lodash'
 
-function Column({ column, createNewCard, deleteColumnDetails }) {
+function Column({ column }) {
   const confirmDeleteColumn = useConfirm()
-
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
   const [toggleNewCard, setToggleNewCard] = useState(false)
   const [cardTitleNew, setCardTitleNew] = useState('')
 
@@ -50,12 +55,39 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
   }
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
-  const handleAddNewCard = () => {
-    const newDataCard = {
+  const handleAddNewCard = async () => {
+
+
+    const { createCard } = await createNewCardAPI({
+      boardId: board?._id,
       title: cardTitleNew,
       columnId: column._id
+    })
+    // Tương tự như hàm createNewColumn phải sử dụng clonedeep
+    const newBoard = cloneDeep(board)
+
+
+
+    const columnToUpdate = newBoard.columns.find((column) => column._id === createCard.columnId)
+
+    if (columnToUpdate) {
+      // SỬA LỖI COLUMN RỖNG: Nếu cột hiện tại đang chỉ chứa duy nhất một Placeholder Card ẩn (tức là cột đang rỗng trên giao diện),
+      // ta cần xóa placeholder card này đi và thay thế bằng card thực tế vừa tạo.
+      if (columnToUpdate.cards.length === 1 && columnToUpdate.cards[0].FE_PlaceholderCard) {
+        columnToUpdate.cards = [createCard]
+        columnToUpdate.cardOrderIds = [createCard._id]
+      } else {
+        // Ngược lại, nếu cột đã có sẵn card thực tế, ta chỉ cần push thêm card mới vào cuối mảng
+        columnToUpdate.cards.push(createCard)
+        columnToUpdate.cardOrderIds.push(createCard._id)
+      }
     }
-    createNewCard(newDataCard)
+
+    dispatch(updateCurrentActiveBoard(newBoard))
+    // cập nhật lại state board
+    // Phiay ront-end chung ta phai tự lam dung lai state data board (thay vi phải gọi lai api fetchBoardDetailsAPI)
+    // Lưu ý: cách làm này phụ thuộc vào tùy lựa chọn và đặc thù dự án, có nơi thì BE sẽ hỗ trợ trả về luôn
+    // toan bộ Board du day co la api tạo Column hay Card di chang nua. > Luc nay FE se nhan hon.
     setToggleNewCard(false)
     setCardTitleNew('')
   }
@@ -84,8 +116,19 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
 
       if (confirmed) {
 
+        const newBoard = { ...board }
 
-        deleteColumnDetails(column._id)
+        newBoard.columns = board.columns.filter((c) => c._id !== column._id)
+        const { result } = await deleteColumnDetailAPI(column._id)
+        if (result.StatusCode === 200) {
+          toast.success(result.deleteResult)
+        } else {
+          toast.error('Lỗi không xoá đọc column')
+        }
+
+        dispatch(updateCurrentActiveBoard(newBoard))
+
+
       }
 
     } catch (error) {
