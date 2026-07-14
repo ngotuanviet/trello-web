@@ -13,14 +13,19 @@ import Typography from '@mui/material/Typography'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchBoardDetailAPI, selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useParams } from 'react-router-dom'
 function Board() {
   // const [board, setBoard] = useState(null)
+  const { boardId } = useParams()
+
+
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
   // không dùng state của component sẽ sử dụng state Redux
   useEffect(() => {
     // sử dinh dispatch để callApi bên activeBoardSlice createAsyncThunk
-    dispatch(fetchBoardDetailAPI('6a4b65841f2db783506bbb9d'))
+    //'6a4b65841f2db783506bbb9d'
+    dispatch(fetchBoardDetailAPI(boardId))
 
   }, [dispatch])
 
