@@ -14,11 +14,12 @@ export const fetchBoardDetailAPI = createAsyncThunk(
   'activeBoard/fetchBoardDetailAPI',
   async (boardId) => {
     const response = await api.get(`/v1/boards/${boardId}`)
-    console.log("🚀 ~ response:", response.data)
 
-    return response.data
+    return response.data.board
   }
 )
+
+
 // Khởi tạo một cái slice trong kho lưu trữ redux
 export const activeBoardSlice = createSlice({
   name: 'activeBoard',
@@ -34,7 +35,8 @@ export const activeBoardSlice = createSlice({
 
       // update lại dữ liệu currentÁctiveBoard
       state.currentActiveBoard = board
-    }
+    },
+
     // extraReducers: Nơi sử lý dữ liệu bất đồng bộ
   }, extraReducers: (builder) => {
     builder.addCase(fetchBoardDetailAPI.fulfilled, (state, action) => {

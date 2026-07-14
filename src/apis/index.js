@@ -1,9 +1,9 @@
 import { api } from "~/apis/config"
 
-export const fetchBoardDetailsAPI = async (boardId) => {
-  const response = await api.get(`/v1/boards/${boardId}`)
-  return response.data
-}
+// export const fetchBoardDetailsAPI = async (boardId) => {
+//   const response = await api.get(`/v1/boards/${boardId}`)
+//   return response.data
+// }
 export const updateBoardDetailsAPI = async (boardId, updateData) => {
   const response = await api.put(`/v1/boards/${boardId}`, updateData)
   return response.data

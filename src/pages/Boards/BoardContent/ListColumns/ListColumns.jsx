@@ -7,17 +7,58 @@ import AddIcon from '@mui/icons-material/Add'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
 import { ConfirmProvider } from 'material-ui-confirm'
-function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDetails }) {
+import { createNewColumnAPI } from '~/apis'
+import { cloneDeep } from 'lodash'
+import { generatePlaceholderCard } from '~/utils/Formatters'
+import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { useDispatch, useSelector } from 'react-redux'
+function ListColumns({ columns }) {
   const [toggleNewColumn, setToggleNewColumn] = useState(false)
   const [columnTitleNew, setColumnTitleNew] = useState('')
+  const board = useSelector(selectCurrentActiveBoard)
+  const dispatch = useDispatch()
   /**
    * Thằng SortableContext yêu cầu items là một mảng dạng ['id1', 'id2'] chứ không phải [{id: 'id-1},{id: 'id-2}]
    */
-  const handleAddNewColumn = () => {
+  const handleAddNewColumn = async () => {
     const dataNewColumn = {
       title: columnTitleNew
     }
-    createNewColumn(dataNewColumn)
+    // Func này có nhiệm vụ gọi API tạo mới Column và làm lại dữ liệu stare board
+
+    const createdColumnResponse = await createNewColumnAPI({
+      boardId: board?._id,
+      ...dataNewColumn
+    })
+
+    // cập nhật lại state board
+    // Cập nhật state board
+    // Phia Front-end chung ta phai tự lam dung lai state data board (thay vi phải gọi lại api
+    // fetchBoardDetailsAPI
+    // Lưu ý: cách lam nay phụ thuộc vao tuy lựa chon và dặc thu dự an, có nơi thì BE sẽ hỗ trợ trả về luôn
+    // toàn bo Board du day co là api tạo Column hay Card di chang nữa. => Lúc nay FE se nhan hơn.
+    /** 
+        * Đoạn này sẽ dinh lỗi object is not extensible bởi dù đã copy/clone ra giá tri newBoard nhưng bản chắt
+    cua spread operator là Shatlow Copy/Clone, nen dinh phai rules Immutability trong Redux Toolkit không
+    dùng được hàm PUSH (sửa giá trị mằng trực tiếp), cách đơn giản nhanh gọn nhất ở trường hợp này của chúng
+    ta là dùng toi Deep Copy/Clone toàn bộ cái Board cho de hieu và code ngàn gọn.
+    . https://redux-toolkit.js.org/usage/immer-reducers
+    * Tài Liệu them về Shatlow và Deep Copy Object trong JS:
+    . https://www.javascripttutckial.net/object/3-ways-to-copy-objects-in-javascript/
+    */
+    // const newBoard = { ...board }
+    const newBoard = cloneDeep(board)
+    const createdColumn = createdColumnResponse.createColumn
+    // Gán _id cho column mới được tạo từ response để tránh lỗi unique key prop trong React khi render ListColumns
+
+    // SỬA LỖI COLUMN RỖNG: Khi tạo một cột mới hoàn toàn rỗng ở phía client,
+    // ta cần tự động gắn một Placeholder Card ẩn vào cột này để dnd-kit nhận diện được nó khi kéo thả.
+    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+    newBoard.columns.push(createdColumn)
+    newBoard.columnOrderIds.push(createdColumnResponse._id)
+    // cập nhật dữ liệu board vào trong redux
+    dispatch(updateCurrentActiveBoard(newBoard))
     setToggleNewColumn(false)
     setColumnTitleNew('')
   }
@@ -44,7 +85,7 @@ function ListColumns({ columns, createNewColumn, createNewCard, deleteColumnDeta
         {columns?.map((column) => (
           <>
 
-            <Column key={column._id} column={column} createNewCard={createNewCard} deleteColumnDetails={deleteColumnDetails} /></>
+            <Column key={column._id} column={column} /></>
 
 
 
