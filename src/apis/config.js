@@ -59,7 +59,7 @@ api.interceptors.response.use(
       //dong refresh lai token.
 
     }
-    if (error.response?.status != 410) {
+    if (error.response?.status !== 410) {
       toast.error(errorMessage)
     }
     return Promise.reject(error)

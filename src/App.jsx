@@ -1,10 +1,39 @@
-import { Route, Routes, Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { Route, Routes, Navigate, Outlet } from 'react-router-dom'
 import NotFound from '~/pages/404/NotFound'
 import AccountVerification from '~/pages/Auth/AccountVerification'
 import Auth from '~/pages/Auth/Auth'
 import Board from '~/pages/Boards/_id'
-function App() {
+import { selectCurrentUser } from '~/redux/user/userSlice'
+/**
+  Giai pháp Clean Code trong viec xac dinh cac route nao cần dang nhập tai khoan xong thi moi cho truy cập
+ Sử dung <Outtet /> cua react-router-don de hien thị cac Child Route (xem cach su dung trong App() ben
 
+https://reactrouter.com/en/main/components/outlet
+Một bai huong dan kha day du:
+https://www.robinwieruch.de/react-router-private-routes/
+
+ */
+const ProtectedRoute = ({ user }) => {
+  if (!user) {
+    return <Navigate to={'/'} replace={true} />
+  }
+  return (
+    <Outlet />
+  )
+
+}
+const PublicRoute = ({ user }) => {
+  if (user) {
+    return <Navigate to={'/'} replace={true} />
+  }
+  return (
+    <Outlet />
+  )
+
+}
+function App() {
+  const currentUser = useSelector(selectCurrentUser)
   return (
     <Routes>
       {/* Redirect Route */}
@@ -15,12 +44,21 @@ function App() {
         // duyệt giua 2 truờng hợp co replace hoặc khong co.
         <Navigate to={"/boards/6a4b65841f2db783506bbb9d"} replace="true" />
       } />
-      {/* Board details */}
-      <Route path='/boards/:boardId' element={<Board />} />
-      {/* Authentication */}
-      <Route path='/login' element={<Auth />} />
-      <Route path='/register' element={<Auth />} />
-      <Route path='/account/verification' element={<AccountVerification />} />
+      {/* Protected Routes (Hiều đơn giản trong dự an cua chung ta tà nhưng route chi cho truy cập sau khi
+đã login) */}
+      {/* Outlet là để hiện thị các thứ trong phần tử bọc nó */}
+      <Route element={<ProtectedRoute user={currentUser} />}>
+
+        {/* Board details */}
+        <Route path='/boards/:boardId' element={<Board />} />
+      </Route>
+      <Route element={<PublicRoute user={currentUser} />}>
+        {/* Authentication */}
+        <Route path='/login' element={<Auth />} />
+        <Route path='/register' element={<Auth />} />
+        <Route path='/account/verification' element={<AccountVerification />} />
+
+      </Route>
 
       {/* 404 not found page */}
       <Route path='*' element={<NotFound />} />
