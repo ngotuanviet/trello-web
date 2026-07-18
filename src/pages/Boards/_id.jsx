@@ -4,16 +4,13 @@ import { useEffect } from 'react'
 import AppBar from '~/components/Appbar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
 import { cloneDeep } from 'lodash'
-import { createNewColumnAPI, createNewCardAPI, updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI, deleteColumnDetailAPI } from '~/apis'
-import { generatePlaceholderCard } from '../../utils/Formatters.js'
-import Typography from '@mui/material/Typography'
+import { updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI, deleteColumnDetailAPI } from '~/apis'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchBoardDetailAPI, selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { useParams } from 'react-router-dom'
+import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 function Board() {
   // const [board, setBoard] = useState(null)
   const { boardId } = useParams()
@@ -117,10 +114,7 @@ object - can thiệp sâu dữ Liệu)
   }
   if (!board) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, width: '100vw', height: '100vh' }}>
-        <CircularProgress aria-label="Loading…" />
-        <Typography>Loading Board...</Typography>
-      </Box>
+      <PageLoadingSpinner caption={'Board loading....'} />
     )
   }
   return (

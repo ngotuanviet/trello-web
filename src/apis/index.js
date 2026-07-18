@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import { api } from "~/apis/config"
 
 // export const fetchBoardDetailsAPI = async (boardId) => {
@@ -31,4 +32,14 @@ export const moveCardToDifferentColumnsAPI = async (updateData) => {
   const response = await api.put('/v1/boards/supports/moving_card', updateData)
   return response.data
 }
-
+// users
+export const registerUserAPI = async (data) => {
+  const response = await api.post('/v1/users/register', data)
+  toast.success(`Account created  successfully! Please check and verify your account before logging in!`, { theme: 'colored' })
+  return response.data
+}
+export const verifyUserAPI = async (data) => {
+  const response = await api.put('/v1/users/verify', data)
+  toast.success(`Account verified  successfully! Now you can login to enjoy or services! Have a good day!`, { theme: 'colored' })
+  return response.data
+}

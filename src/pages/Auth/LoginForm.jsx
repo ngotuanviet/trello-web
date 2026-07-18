@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Avatar from '@mui/material/Avatar'
@@ -13,12 +13,36 @@ import Alert from '@mui/material/Alert'
 import { useForm } from 'react-hook-form'
 import { EMAIL_RULE, EMAIL_RULE_MESSAGE, FIELD_REQUIRED_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from '~/utils/validators'
 import FieldErrorAlert from '~/components/Form/FieldErrorAlert'
+import { useSearchParams } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { loginUserAPI } from '~/redux/user/userSlice'
+import { toast } from 'react-toastify'
+
 function LoginForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { verifiedEmail, registerEmail } = Object.fromEntries([...searchParams])
+  const dispatch = useDispatch()
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm()
   const submitLogIn = (data) => {
-    console.log("🚀 ~ submitLogIn ~ data:", data)
+    const { email, password } = data
+    toast.promise(dispatch(loginUserAPI({ email, password })),
+      {
+        pending: 'Logging is in progress... '
+      }).then((res) => {
+        console.log(res)
+        // Đoạn này phải kiểm tra không có lỗi thì mới redirect về route
+        if (!res.error) {
+          navigate('/')
+
+        }
+      }
+      );
+
+
 
   }
+
   return (
 
     <form onSubmit={handleSubmit(submitLogIn)}>
@@ -35,16 +59,21 @@ function LoginForm() {
           </Box>
 
           <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '0 1em' }}>
-            <Alert severity="success" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
-              Your email&nbsp;
-              <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>ngotuanviet9@gmail.com</Typography>
-              &nbsp;has been verified.<br />Now you can login to enjoy our services! Have a good day!
-            </Alert>
-            <Alert severity="info" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
-              An email has been sent to&nbsp;
-              <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>ngotuanviet9@gmail.com</Typography>
-              <br />Please check and verify your account before logging in!
-            </Alert>
+            {
+              verifiedEmail && <Alert severity="success" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
+                Your email&nbsp;
+                <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>{verifiedEmail}</Typography>
+                &nbsp;has been verified.<br />Now you can login to enjoy our services! Have a good day!
+              </Alert>
+            }
+            {
+              registerEmail && <Alert severity="info" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>
+                An email has been sent to&nbsp;
+                <Typography variant="span" sx={{ fontWeight: 'bold', '&:hover': { color: '#fdba26' } }}>{registerEmail}</Typography>
+                <br />Please check and verify your account before logging in!
+              </Alert>
+            }
+
           </Box>
           <Box sx={{ padding: '0 1em 1em 1em' }}>
             <Box sx={{ marginTop: '1em' }}>

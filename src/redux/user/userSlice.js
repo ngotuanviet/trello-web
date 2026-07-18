@@ -1,0 +1,42 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { api } from "~/apis/config";
+
+
+// Khởi tạo giá trị trong redux
+const initialState = {
+  currentUser: null
+}
+
+// Các hành động goi api (bất đồng bộ) và cập nhật dữ liêu vào Redux, dùng Middleware createAsyncThunk đi kèm với extraReducers
+export const loginUserAPI = createAsyncThunk(
+  'user/loginUserAPI',
+  async (data) => {
+    const response = await api.post(`/v1/users/login`, data)
+
+    return response.data
+  }
+)
+
+
+// Khởi tạo một cái slice trong kho lưu trữ redux
+export const userSlice = createSlice({
+  name: 'user',
+  initialState,
+  // Reducers nơi xử lý dữ liệu đồng bộ
+  reducers: {
+
+    // extraReducers: Nơi sử lý dữ liệu bất đồng bộ
+  }, extraReducers: (builder) => {
+    builder.addCase(loginUserAPI.fulfilled, (state, action) => {
+
+      state.currentUser = action.payload
+    })
+  }
+})
+// export const { updateCurrentActiveBoard } = userSlice.actions
+// Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
+export const selectCurrentUser = (state) => {
+  return state.user.currentUser
+}
+// Cái file này tên là activeBoardSlice NHƯNG chúng ta sẽ export một thứ tên là Reducer
+export default userSlice.reducer
