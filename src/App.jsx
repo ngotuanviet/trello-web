@@ -5,6 +5,7 @@ import AccountVerification from '~/pages/Auth/AccountVerification'
 import Auth from '~/pages/Auth/Auth'
 import Board from '~/pages/Boards/_id'
 import { selectCurrentUser } from '~/redux/user/userSlice'
+import Settings from '~/pages/Settings/Settings'
 /**
   Giai pháp Clean Code trong viec xac dinh cac route nao cần dang nhập tai khoan xong thi moi cho truy cập
  Sử dung <Outtet /> cua react-router-don de hien thị cac Child Route (xem cach su dung trong App() ben
@@ -51,6 +52,10 @@ function App() {
 
         {/* Board details */}
         <Route path='/boards/:boardId' element={<Board />} />
+        {/* User Setting */}
+        <Route path='/settings/account' element={<Settings />} />
+        <Route path='/settings/security' element={<Settings />} />
+
       </Route>
       <Route element={<PublicRoute user={currentUser} />}>
         {/* Authentication */}

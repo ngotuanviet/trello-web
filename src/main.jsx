@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client'
 import App from '~/App.jsx'
 import CssBaseline from '@mui/material/CssBaseline'
+import GlobalStyles from '@mui/material/GlobalStyles';
 import { BrowserRouter } from "react-router-dom";
 
 import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material'
@@ -21,6 +22,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter basename='/'>
       <Provider store={store}>
         <PersistGate persistor={persister}>
+
           <CssVarsProvider theme={theme}>
             <ConfirmProvider defaultOptions={{
               dialogProps: { maxWidth: 'xs' },
@@ -28,7 +30,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               confirmationButtonProps: { color: 'secondary', variant: 'outlined' },
               cancellationButtonProps: { color: 'inherit' },
             }}>
-
+              <GlobalStyles styles={{
+                a: {
+                  textDecoration: 'none'
+                }
+              }} />
               <CssBaseline />
 
               <App />

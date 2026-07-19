@@ -17,14 +17,20 @@ export const loginUserAPI = createAsyncThunk(
     return response.data
   }
 )
+export const updateUserAPI = createAsyncThunk(
+  'user/updateUserAPI', async (data) => {
+    const response = await api.put(`/v1/users/update`, data)
+    return response.data
+  }
+)
 export const logoutUserAPI = createAsyncThunk(
   'user/logoutUserAPI',
   async (showSuccessMessage = true) => {
-    const res = await api.delete('/v1/users/logout')
+    const response = await api.delete('/v1/users/logout')
     if (showSuccessMessage) {
       toast.success('Logged out successfully')
     }
-    return res.data
+    return response.data
   }
 )
 
@@ -43,6 +49,9 @@ export const userSlice = createSlice({
     })
     builder.addCase(logoutUserAPI.fulfilled, (state) => {
       state.currentUser = null
+    })
+    builder.addCase(updateUserAPI.fulfilled, (state, action) => {
+      state.currentUser = action.payload
     })
   }
 })
