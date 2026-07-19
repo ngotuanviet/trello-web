@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
 import { api } from "~/apis/config";
 
 
@@ -16,7 +17,16 @@ export const loginUserAPI = createAsyncThunk(
     return response.data
   }
 )
-
+export const logoutUserAPI = createAsyncThunk(
+  'user/logoutUserAPI',
+  async (showSuccessMessage = true) => {
+    const res = await api.delete('/v1/users/logout')
+    if (showSuccessMessage) {
+      toast.success('Logged out successfully')
+    }
+    return res.data
+  }
+)
 
 // Khởi tạo một cái slice trong kho lưu trữ redux
 export const userSlice = createSlice({
@@ -30,6 +40,9 @@ export const userSlice = createSlice({
     builder.addCase(loginUserAPI.fulfilled, (state, action) => {
 
       state.currentUser = action.payload
+    })
+    builder.addCase(logoutUserAPI.fulfilled, (state) => {
+      state.currentUser = null
     })
   }
 })

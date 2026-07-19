@@ -16,7 +16,7 @@ https://www.robinwieruch.de/react-router-private-routes/
  */
 const ProtectedRoute = ({ user }) => {
   if (!user) {
-    return <Navigate to={'/'} replace={true} />
+    return <Navigate to={'/login'} replace={true} />
   }
   return (
     <Outlet />

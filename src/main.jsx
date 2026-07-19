@@ -11,7 +11,10 @@ import { Provider } from 'react-redux';
 import { store } from '~/redux/store';
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistStore } from 'redux-persist'
+import { injectStore } from '~/apis/config';
 const persister = persistStore(store)
+// Kỹ thuật inject Store là kỹ thuật khi cần sử dụng biền redux store o các file ngoài phạm vi component nhu file config hiện tại
+injectStore(store)
 // Cấu hình react-router-dom với browserRouter
 ReactDOM.createRoot(document.getElementById('root')).render(
   <>
