@@ -25,10 +25,11 @@ import ListCards from './ListCards/ListCards'
 import { mapOrder } from '~/utils/sorts'
 import { ConfirmProvider, useConfirm } from 'material-ui-confirm'
 import { toast } from 'react-toastify'
-import { createNewCardAPI, deleteColumnDetailAPI } from '~/apis'
+import { createNewCardAPI, deleteColumnDetailAPI, updateColumnDetailsAPI } from '~/apis'
 import { selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { cloneDeep } from 'lodash'
+import ToggleFocusInput from '~/components/Form/ToggleFocusInput'
 
 function Column({ column }) {
   const confirmDeleteColumn = useConfirm()
@@ -135,6 +136,21 @@ function Column({ column }) {
       toast.error('Lỗi xoá cột!')
     }
   }
+  const onUpdateColumnTitle = (newTitle) => {
+    console.log(newTitle);
+
+    updateColumnDetailsAPI(column._id, { title: newTitle }).then(() => {
+      const newBoard = cloneDeep(board)
+      const columnToUpdate = newBoard.columns.find((c) => c._id === column._id)
+
+      if (columnToUpdate) {
+        columnToUpdate.title = newTitle
+      }
+
+      dispatch(updateCurrentActiveBoard(newBoard))
+
+    })
+  }
   const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
   return (
     <div ref={setNodeRef}
@@ -167,7 +183,7 @@ function Column({ column }) {
             justifyContent: 'space-between',
           }}
         >
-          <Typography
+          {/* <Typography
             variant="h6"
             sx={{
               fontSize: '1rem',
@@ -175,8 +191,14 @@ function Column({ column }) {
               cursor: 'pointer',
             }}
           >
+
             {column?.title}
-          </Typography>
+          </Typography> */}
+          <ToggleFocusInput
+            value={column?.title}
+            onChangedValue={onUpdateColumnTitle}
+            data-no-dnd='true'
+          />
           <Box>
             <Tooltip title="More options">
               <ExpandMoreIcon

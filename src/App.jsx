@@ -44,7 +44,7 @@ function App() {
         //trong history cua Browser
         // Thực hành de hieu hon bằng cach nhan Go Home tu trang 404 xong thu quay lai bằng nut back cua trinh
         // duyệt giua 2 truờng hợp co replace hoặc khong co.
-        <Navigate to={"/boards/6a4b65841f2db783506bbb9d"} replace="true" />
+        <Navigate to={"/boards"} replace="true" />
       } />
       {/* Protected Routes (Hiều đơn giản trong dự an cua chung ta tà nhưng route chi cho truy cập sau khi
 đã login) */}

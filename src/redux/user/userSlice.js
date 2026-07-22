@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import { api } from "~/apis/config";
 
@@ -51,9 +51,10 @@ export const userSlice = createSlice({
       state.currentUser = null
     })
     builder.addCase(updateUserAPI.fulfilled, (state, action) => {
-      const infoUserNew = action.payload
 
-      state.currentUser = infoUserNew
+
+
+      state.currentUser = action.payload
     })
   }
 })

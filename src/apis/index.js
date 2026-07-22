@@ -9,7 +9,15 @@ export const updateBoardDetailsAPI = async (boardId, updateData) => {
   const response = await api.put(`/v1/boards/${boardId}`, updateData)
   return response.data
 }
-
+export const fetchBoardsAPI = async (searchPatch) => {
+  const response = await api.get(`/v1/boards${searchPatch}`)
+  return response.data
+}
+export const createNewBoardAPI = async (updateData) => {
+  const response = await api.post(`/v1/boards`, updateData)
+  toast.success('Board created successfully')
+  return response.data
+}
 // Column
 export const updateColumnDetailsAPI = async (columnId, updateData) => {
   const response = await api.put(`/v1/columns/${columnId}`, updateData)

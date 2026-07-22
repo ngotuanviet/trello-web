@@ -22,6 +22,8 @@ import randomColor from 'randomcolor'
 import SidebarCreateBoardModal from './create'
 
 import { styled } from '@mui/material/styles'
+import { fetchBoardsAPI } from '~/apis'
+import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 // Styles của mấy cái Sidebar item menu, anh gom lại ra đây cho gọn.
 const SidebarItem = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -59,17 +61,27 @@ function Boards() {
    * Nhắc lại kiến thức cơ bản hàm parseInt cần tham số thứ 2 là Hệ thập phân (hệ đếm cơ số 10) để đảm bảo chuẩn số cho phân trang
    */
   const page = parseInt(query.get('page') || '1', 10)
-
+  const updateStateData = (res) => {
+    setBoards(res.boards || [])
+    setTotalBoards(res.totalBoards || 0)
+  }
   useEffect(() => {
-    // Fake tạm 16 cái item thay cho boards
-    // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    setBoards([...Array(16)].map((_, i) => i))
-    // Fake tạm giả sử trong Database trả về có tổng 100 bản ghi boards
-    setTotalBoards(100)
-
+    // // Fake tạm 16 cái item thay cho boards
+    // // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    // setBoards([...Array(16)].map((_, i) => i))
+    // // Fake tạm giả sử trong Database trả về có tổng 100 bản ghi boards
+    // setTotalBoards(100)
+    // Moi khi cai url thay đoi vi dự như chung ta chuyen trang, thì cai location.search lay từ hook
+    //useLocation cua react-router-dom cung thay đoi theo, đồng nghĩa hàm useEffect sẽ chay lại và fetch lại API
+    // theo dung page moi vi cai localtion.search dã nam trong dependencies cua useEffect
     // Gọi API lấy danh sách boards ở đây...
-    // ...
-  }, [])
+    // console.log(location);
+    fetchBoardsAPI(location.search).then(updateStateData)
+  }, [location.search])
+  const afterCreateNewBoard = () => {
+    // fetch lại danh sách board trong useEffect
+    fetchBoardsAPI(location.search).then(updateStateData)
+  }
 
   // Lúc chưa tồn tại boards > đang chờ gọi api thì hiện loading
   if (!boards) {
@@ -98,7 +110,7 @@ function Boards() {
             </Stack>
             <Divider sx={{ my: 1 }} />
             <Stack direction="column" spacing={1}>
-              <SidebarCreateBoardModal />
+              <SidebarCreateBoardModal afterCreateNewBoard={afterCreateNewBoard} />
             </Stack>
           </Grid>
 
@@ -122,17 +134,17 @@ function Boards() {
 
                       <CardContent sx={{ p: 1.5, '&:last-child': { p: 1.5 } }}>
                         <Typography gutterBottom variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                          Board title
+                          {b.title}
                         </Typography>
                         <Typography
                           variant="body2"
                           color="text.secondary"
                           sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                          This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.
+                          {b.description}
                         </Typography>
                         <Box
                           component={Link}
-                          to={'/boards/6534e1b8a235025a66b644a5'}
+                          to={`/boards/${b._id}`}
                           sx={{
                             mt: 1,
                             display: 'flex',
@@ -159,14 +171,14 @@ function Boards() {
                   showFirstButton
                   showLastButton
                   // Giá trị prop count của component Pagination là để hiển thị tổng số lượng page, công thức là lấy Tổng số lượng bản ghi chia cho số lượng bản ghi muốn hiển thị trên 1 page (ví dụ thường để 12, 24, 26, 48...vv). sau cùng là làm tròn số lên bằng hàm Math.ceil
-                  count={Math.ceil(totalBoards / 12)}
+                  count={Math.ceil(totalBoards / DEFAULT_ITEMS_PER_PAGE)}
                   // Giá trị của page hiện tại đang đứng
                   page={page}
                   // Render các page item và đồng thời cũng là những cái link để chúng ta click chuyển trang
                   renderItem={(item) => (
                     <PaginationItem
                       component={Link}
-                      to={`/boards${item.page === 1 ? '' : `?page=${item.page}`}`}
+                      to={`/boards${item.page === DEFAULT_PAGE ? '' : `?page=${item.page}`}`}
                       {...item}
                     />
                   )}
