@@ -18,6 +18,10 @@ export const createNewBoardAPI = async (updateData) => {
   toast.success('Board created successfully')
   return response.data
 }
+export const moveCardToDifferentColumnsAPI = async (updateData) => {
+  const response = await api.put('/v1/boards/supports/moving_card', updateData)
+  return response.data
+}
 // Column
 export const updateColumnDetailsAPI = async (columnId, updateData) => {
   const response = await api.put(`/v1/columns/${columnId}`, updateData)
@@ -36,8 +40,9 @@ export const createNewCardAPI = async (data) => {
   const response = await api.post(`/v1/cards`, data)
   return response.data
 }
-export const moveCardToDifferentColumnsAPI = async (updateData) => {
-  const response = await api.put('/v1/boards/supports/moving_card', updateData)
+
+export const updateCardDetailsAPI = async (cardId, data) => {
+  const response = await api.put(`/v1/cards/${cardId}`, data)
   return response.data
 }
 // users

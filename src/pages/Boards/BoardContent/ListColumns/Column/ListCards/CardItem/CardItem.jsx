@@ -9,12 +9,15 @@ import ModeCommentIcon from '@mui/icons-material/ModeComment'
 import AttachmentIcon from '@mui/icons-material/Attachment'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useDispatch } from 'react-redux'
+import { showModalActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
 
 function CardItem({ card }) {
   const { attributes, listeners, setNodeRef, transform, isDragging, transition } = useSortable({
     id: card._id,
     data: { type: 'ACTIVE_DRAG_ITEM_TYPE_CARD', card },
   })
+  const dispatch = useDispatch()
   const dhdKitCardStyles = {
     /**
      * TouchAction: 'none', // Dành cho sensor default dạng Pointer sensor
@@ -29,13 +32,19 @@ function CardItem({ card }) {
   const shouldShowCardActions = () => {
     return !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
   }
+  const setActiveCard = () => {
+    dispatch(updateCurrentActiveCard(card))
+    dispatch(showModalActiveCard())
+  }
   return (
     <>
       <Card
+        onClick={setActiveCard}
         ref={setNodeRef}
         style={dhdKitCardStyles}
         {...attributes}
         {...listeners}
+
         sx={{
           cursor: 'pointer',
           boxShadow: '0 1px 1px rgba(0,0,0,0.2)',

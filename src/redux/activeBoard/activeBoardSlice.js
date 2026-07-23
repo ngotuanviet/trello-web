@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, current } from "@reduxjs/toolkit";
 import { api } from "~/apis/config";
 import { mapOrder } from '~/utils/sorts'
 import { isEmpty } from 'lodash'
@@ -6,7 +6,8 @@ import { generatePlaceholderCard } from "~/utils/Formatters";
 
 // Khởi tạo giá trị trong redux
 const initialState = {
-  currentActiveBoard: null
+  currentActiveBoard: null,
+
 }
 
 // Các hành động goi api (bất đồng bộ) và cập nhật dữ liêu vào Redux, dùng Middleware createAsyncThunk đi kèm với extraReducers
@@ -36,12 +37,35 @@ export const activeBoardSlice = createSlice({
       // update lại dữ liệu currentÁctiveBoard
       state.currentActiveBoard = board
     },
-
+    updateCardInBoard: (state, action) => {
+      // updated nested data
+      // https://redux-toolkit.js.org/usage/immer-reducers#updating-nested-data
+      const incomingCard = action.payload
+      // tìm dần từ board > column > card
+      const column = state.currentActiveBoard.columns.find((c) => c._id === incomingCard.columnId)
+      if (column) {
+        const card = column.cards.find((c) => c._id === incomingCard._id)
+        console.log(current(card));
+        /**
+        * Giải thích đoạn dưới, các bạn mới lần đầu sẽ dễ bị lú :D
+        * Đơn giản là dùng Object.keys để lấy toàn bộ các properties (keys) của incomingCard về một Array
+        rồi forEach no ra.
+        * Sau đó tùy vào trường hợp cần thì kiểm tra thêm còn không thì cập nhật ngược lại giá trị vào
+        card luôn như bên dưới.
+        */
+        if (card) {
+          Object.keys(incomingCard).forEach(key => {
+            card[key] = incomingCard[key]
+          })
+        }
+      }
+    }
     // extraReducers: Nơi sử lý dữ liệu bất đồng bộ
   }, extraReducers: (builder) => {
     builder.addCase(fetchBoardDetailAPI.fulfilled, (state, action) => {
       let board = action.payload
-
+      // Thành viên trong board sẽ là gộp lại của 2 mảng owners và members
+      board.FE_allUsers = board.owners.concat(board.members)
       // action.payload chính là response.data
       // Sắp xếp thứ tự các column luôn ở đây trước khi đưa dữ Liệu xuống bên dưới các component con
       board.columns = mapOrder(board?.columns, board?.columnOrderIds, '_id')
@@ -61,7 +85,7 @@ export const activeBoardSlice = createSlice({
     })
   }
 })
-export const { updateCurrentActiveBoard } = activeBoardSlice.actions
+export const { updateCurrentActiveBoard, updateCardInBoard } = activeBoardSlice.actions
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
 export const selectCurrentActiveBoard = (state) => {
   return state.activeBoard.currentActiveBoard

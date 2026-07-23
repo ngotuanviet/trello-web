@@ -11,6 +11,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import Tooltip from '@mui/material/Tooltip'
 import Button from '@mui/material/Button'
 import { CapitalizeFirstLetter } from '~/utils/Formatters'
+import BoardUserGroup from '~/pages/Boards/BoardBar/BoardUserGroup'
 
 const MENU_STYLES = {
   color: 'white',
@@ -99,27 +100,8 @@ function BoardBar({ Board }) {
           >
             Invite
           </Button>
-          <AvatarGroup
-            sx={{
-              gap: '10px',
-              '& .MuiAvatar-root': {
-                width: 34,
-                height: 34,
-                fontSize: '16px',
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                '&:first-of-type': {
-                  bgcolor: '#a4b0be',
-                },
-              },
-            }}
-            max={4}
-          >
-            <Tooltip title="Ngotuanviet">
-              <Avatar alt="Ngotuanviet" src="/static/images/avatar/1.jpg" />
-            </Tooltip>
-          </AvatarGroup>
+          {/* Xử lý hiện thị danh sách thành viên của board */}
+          <BoardUserGroup boardUsers={Board?.FE_allUsers} />
         </Box>
       </Box>
     </>
