@@ -123,12 +123,11 @@ object - can thiệp sâu dữ Liệu)
   }
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
-      {/* Modal Active card, check đóng/mở dựa theo điều kiện có tồn tại data activeCard lưu trong
+      {/* Modal Active card, check đóng/mở dựa theo điều kiện có tồn tại isShowModalActiveCard lưu trong
       Redux hay không thì mới render. Mỗi thời điểm chỉ tồn tại một cái Modal card đang active
       */}
-      {
-        activeModalCard && <ActiveCard />
-      }
+      <ActiveCard />
+
 
       {/* Các thành phần còn lại của board details */}
       <AppBar />

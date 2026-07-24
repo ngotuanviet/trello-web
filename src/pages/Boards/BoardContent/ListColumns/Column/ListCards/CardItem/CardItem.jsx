@@ -33,7 +33,9 @@ function CardItem({ card }) {
     return !!card?.memberIds?.length || !!card?.comments?.length || !!card?.attachments?.length
   }
   const setActiveCard = () => {
+    // lấy giá trị của card đang ấn truyền vào redux
     dispatch(updateCurrentActiveCard(card))
+    // set trạng thái modal hiện thị hay ji
     dispatch(showModalActiveCard())
   }
   return (

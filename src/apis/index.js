@@ -45,6 +45,7 @@ export const updateCardDetailsAPI = async (cardId, data) => {
   const response = await api.put(`/v1/cards/${cardId}`, data)
   return response.data
 }
+
 // users
 export const registerUserAPI = async (data) => {
   const response = await api.post('/v1/users/register', data)
@@ -58,5 +59,10 @@ export const verifyUserAPI = async (data) => {
 }
 export const refreshTokenAPI = async () => {
   const response = await api.get('/v1/users/refresh_token')
+  return response.data
+}
+export const inviteUserToBoardAPI = async (data) => {
+  const response = await api.post('/v1/invitations/board', data)
+  toast.success('User invited to board successfully')
   return response.data
 }
