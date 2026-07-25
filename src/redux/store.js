@@ -5,6 +5,7 @@ import { combineReducers } from 'redux'
 import { persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage' // default là localstorage
 import { activeCardReducer } from "~/redux/activeCard/activeCardSlice";
+import { notificationsReducer } from "~/redux/notifications/notificationsSlice";
 /**
  * Cầu hinh redux-persist
 * https://www.npmjs.com/package/redux-persist
@@ -21,7 +22,8 @@ const rootPersistConfig = {
 const reducers = combineReducers({
   activeBoard: activeBoardReducer,
   user: userReducer,
-  activeCard: activeCardReducer
+  activeCard: activeCardReducer,
+  notifications: notificationsReducer,
 })
 // thực hiện persist Reducer
 const persistReducers = persistReducer(rootPersistConfig, reducers)
