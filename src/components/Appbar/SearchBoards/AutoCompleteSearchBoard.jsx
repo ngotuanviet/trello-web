@@ -50,13 +50,17 @@ function AutoCompleteSearchBoard() {
     })
   }
   // Bọc hàm handleInputSearchChange ở trên vào useDebounceFn và cho delay khoảng 1s sau khi dừng gõ phím thì mới chạy cái function
-  const debounceSearchBoard = useDebounceFn(handleInputSearchChange, 3000)
+  const debounceSearchBoard = useDebounceFn(handleInputSearchChange, 1000)
 
 
   // Khi chúng ta select chọn một cái board cụ thể thì sẽ điều hướng tới board đó luôn
   const handleSelectedBoard = (event, selectedBoard) => {
     // Phải kiểm tra nếu tồn tại một cái board cụ thể được select thì mới gọi điều hướng - navigate
-    console.log(selectedBoard)
+
+    if (selectedBoard) {
+      navigate(`/boards/${selectedBoard._id}`)
+    }
+
   }
 
   return (
