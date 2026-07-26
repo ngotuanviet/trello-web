@@ -10,20 +10,14 @@ import Recent from './Menus/Recent'
 import Starred from './Menus/Starred'
 import Templates from './Menus/Templates'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Badge from '@mui/material/Badge'
+
 import Tooltip from '@mui/material/Tooltip'
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import Profiles from './Menus/Profiles'
 import AddIcon from '@mui/icons-material/Add'
-import InputAdornment from '@mui/material/InputAdornment'
-import SearchIcon from '@mui/icons-material/Search'
-import CloseIcon from '@mui/icons-material/Close'
-import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Notifications from '~/components/Appbar/Notifications/Notifications'
+import AutoCompleteSearchBoard from '~/components/Appbar/SearchBoards/AutoCompleteSearchBoard'
 function AppBar() {
-  const [searchValue, setSearchValue] = useState('')
   const navigate = useNavigate();
 
 
@@ -100,55 +94,8 @@ function AppBar() {
             gap: 2,
           }}
         >
-          <TextField
-            id="outlined-search"
-            label="Search..."
-            type="text"
-            size="small"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'white' }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <CloseIcon
-                    onClick={() => setSearchValue('')}
-                    fontSize="small"
-                    sx={{ cursor: 'pointer', color: searchValue ? 'white' : 'transparent' }}
-                  />
-                </InputAdornment>
-
-              ),
-            }}
-            sx={{
-              minWidth: '120px',
-              maxWidth: '180px',
-              '& label': {
-                color: 'white',
-              },
-              '& input': {
-                color: 'white',
-              },
-              '& label.Mui-focused': {
-                color: 'white',
-              },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: 'white',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'white',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'white',
-                },
-              },
-            }}
-          />
+          {/* Tìm kiếm nhanh 1 hoặc nhiều cái board */}
+          <AutoCompleteSearchBoard />
           {/* Dark - light mode */}
           <ModeSelect />
           {/* Xử lý hiện thị các thông báo - notifications */}

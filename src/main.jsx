@@ -15,9 +15,7 @@ import { persistStore } from 'redux-persist'
 import { injectStore } from '~/apis/config';
 //  Cầu  hinh  Socket-io phia client tại đay va export ra bien socketIoInstance
 //https://socket.io/how-to/use-with-react
-import { io } from 'socket.io-client';
-import { API_ROOT } from '~/utils/constants';
-export const socketIoInstance = io(API_ROOT)
+
 const persister = persistStore(store)
 // Kỹ thuật inject Store là kỹ thuật khi cần sử dụng biền redux store o các file ngoài phạm vi component nhu file config hiện tại
 injectStore(store)
