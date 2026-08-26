@@ -5,22 +5,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import EditNoteIcon from '@mui/icons-material/EditNote'
-
-// const markdownValueExample = `
-//   *\`Markdown Content Example:\`*
-
-//   **Hello world | TrungQuanDev - Một Lập Trình Viên | Trello MERN Stack Advanced**
-//   [![](https://avatars.githubusercontent.com/u/14128099?v=4&s=80)](https://avatars.githubusercontent.com/u/14128099?v=4)
-//   \`\`\`javascript
-//   import React from "react"
-//   import ReactDOM from "react-dom"
-//   import MDEditor from '@uiw/react-md-editor'
-//   \`\`\`
-// `
-/**
- * Vài ví dụ Markdown từ lib
- * https://codesandbox.io/embed/markdown-editor-for-react-izdd6?fontsize=14&hidenavigation=1&theme=dark
- */
 function CardDescriptionMdEditor({ cardDescriptionProp, handleUpdateCardDescription }) {
 
   // Lấy giá trị 'dark', 'light' hoặc 'system' mode từ MUI để support phần Markdown bên dưới: data-color-mode={mode}
