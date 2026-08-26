@@ -56,8 +56,11 @@ function LoginForm() {
           }}>
             <Avatar sx={{ bgcolor: 'primary.main' }}><LockIcon /></Avatar>
             <Avatar sx={{ bgcolor: 'primary.main' }}> <SvgIcon component={TrelloIcon} inheritViewBox /></Avatar>
-          </Box>
 
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <h1> Login</h1>
+          </Box>
           <Box sx={{ marginTop: '1em', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '0 1em' }}>
             {
               verifiedEmail && <Alert severity="success" sx={{ '.MuiAlert-message': { overflow: 'hidden' } }}>

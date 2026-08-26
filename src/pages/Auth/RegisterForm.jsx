@@ -45,7 +45,9 @@ function RegisterForm() {
             <Avatar sx={{ bgcolor: 'primary.main' }}><LockIcon /></Avatar>
             <Avatar sx={{ bgcolor: 'primary.main' }}> <SvgIcon component={TrelloIcon} /></Avatar>
           </Box>
-
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <h1> Register </h1>
+          </Box>
           <Box sx={{ padding: '0 1em 1em 1em' }}>
             <Box sx={{ marginTop: '1em' }}>
               <TextField
