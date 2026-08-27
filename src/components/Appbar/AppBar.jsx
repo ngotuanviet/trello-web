@@ -15,8 +15,8 @@ import Tooltip from '@mui/material/Tooltip'
 import Profiles from './Menus/Profiles'
 import AddIcon from '@mui/icons-material/Add'
 import { Link, useNavigate } from 'react-router-dom'
-import Notifications from '~/components/Appbar/Notifications/Notifications'
-import AutoCompleteSearchBoard from '~/components/Appbar/SearchBoards/AutoCompleteSearchBoard'
+import Notifications from '~/components/AppBar/Notifications/Notifications'
+import AutoCompleteSearchBoard from '~/components/AppBar/SearchBoards/AutoCompleteSearchBoard'
 function AppBar() {
   const navigate = useNavigate();
 
