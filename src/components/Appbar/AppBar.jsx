@@ -14,11 +14,15 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import Profiles from './Menus/Profiles'
 import AddIcon from '@mui/icons-material/Add'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Notifications from '~/components/AppBar/Notifications/Notifications'
 import AutoCompleteSearchBoard from '~/components/AppBar/SearchBoards/AutoCompleteSearchBoard'
+import CreateBoardModal from '~/components/Modal/CreateBoard/CreateBoardModal'
+
 function AppBar() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const [isOpenCreateModal, setIsOpenCreateModal] = useState(false)
 
 
   return (
@@ -72,7 +76,7 @@ function AppBar() {
           </Box>
 
           <Box sx={{ display: { sx: 'none', md: 'flex' }, gap: 1 }}>
-            <WorkSpace />
+            <WorkSpace onOpenCreateBoardModal={() => setIsOpenCreateModal(true)} />
             <Recent />
             <Starred />
             <Templates />
@@ -80,6 +84,7 @@ function AppBar() {
 
           <Button
             variant="outlined"
+            onClick={() => setIsOpenCreateModal(true)}
             sx={{ color: 'white', border: 'none', '&:hover': 'none' }}
             startIcon={<AddIcon />}
           >
@@ -106,6 +111,10 @@ function AppBar() {
           <Profiles />
         </Box>
       </Box>
+      <CreateBoardModal
+        isOpen={isOpenCreateModal}
+        handleClose={() => setIsOpenCreateModal(false)}
+      />
     </>
   )
 }

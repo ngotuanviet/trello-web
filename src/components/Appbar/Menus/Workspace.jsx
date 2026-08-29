@@ -1,25 +1,48 @@
+import { useState } from 'react'
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemText from '@mui/material/ListItemText'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import Typography from '@mui/material/Typography'
-import ContentCut from '@mui/icons-material/ContentCut'
-import ContentCopy from '@mui/icons-material/ContentCopy'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Divider from '@mui/material/Divider'
-import ContentPaste from '@mui/icons-material/ContentPaste'
-import Cloud from '@mui/icons-material/Cloud'
-import { useState } from 'react'
-function WorkSpaces() {
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import DashboardIcon from '@mui/icons-material/Dashboard'
+import AddBoxIcon from '@mui/icons-material/AddBox'
+import PersonIcon from '@mui/icons-material/Person'
+import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { selectCurrentUser } from '~/redux/user/userSlice'
+
+function WorkSpaces({ onOpenCreateBoardModal }) {
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
+  const navigate = useNavigate()
+  const currentUser = useSelector(selectCurrentUser)
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
+
   const handleClose = () => {
     setAnchorEl(null)
   }
+
+  const handleGoToBoards = () => {
+    handleClose()
+    navigate('/boards')
+  }
+
+  const handleOpenCreateModal = () => {
+    handleClose()
+    if (onOpenCreateBoardModal) onOpenCreateBoardModal()
+  }
+
+  const handleGoToSettings = () => {
+    handleClose()
+    navigate('/settings/account')
+  }
+
   return (
     <div>
       <Button
@@ -38,45 +61,45 @@ function WorkSpaces() {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        slotProps={{
-          list: {
-            'aria-labelledby': 'basic-button-workspaces',
-          },
+        MenuListProps={{
+          'aria-labelledby': 'basic-button-workspaces'
+        }}
+        PaperProps={{
+          sx: { minWidth: 260 }
         }}
       >
-        <MenuItem>
-          <ListItemIcon>
-            <ContentCut fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Cut</ListItemText>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            ⌘X
+        <MenuItem disabled sx={{ opacity: '1 !important', pb: 0.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', color: 'text.secondary' }}>
+            Current Workspace
           </Typography>
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={handleGoToBoards}>
           <ListItemIcon>
-            <ContentCopy fontSize="small" />
+            <PersonIcon fontSize="small" color="primary" />
           </ListItemIcon>
-          <ListItemText>Copy</ListItemText>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            ⌘C
-          </Typography>
-        </MenuItem>
-        <MenuItem>
-          <ListItemIcon>
-            <ContentPaste fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Paste</ListItemText>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            ⌘V
-          </Typography>
+          <ListItemText
+            primary={`${currentUser?.displayName || currentUser?.username || 'User'}'s Workspace`}
+            secondary="Free Workspace"
+            primaryTypographyProps={{ variant: 'body2', sx: { fontWeight: 600 } }}
+            secondaryTypographyProps={{ variant: 'caption' }}
+          />
         </MenuItem>
         <Divider />
-        <MenuItem>
+        <MenuItem onClick={handleGoToBoards}>
           <ListItemIcon>
-            <Cloud fontSize="small" />
+            <DashboardIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Web Clipboard</ListItemText>
+          <ListItemText primary="View all boards" primaryTypographyProps={{ variant: 'body2' }} />
+        </MenuItem>
+        <MenuItem onClick={handleOpenCreateModal}>
+          <ListItemIcon>
+            <AddBoxIcon fontSize="small" color="success" />
+          </ListItemIcon>
+          <ListItemText primary="Create a board" primaryTypographyProps={{ variant: 'body2' }} />
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleGoToSettings}>
+          <ListItemText primary="Workspace Settings" primaryTypographyProps={{ variant: 'body2', color: 'text.secondary' }} />
         </MenuItem>
       </Menu>
     </div>

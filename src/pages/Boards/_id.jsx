@@ -1,6 +1,6 @@
 // Board Detail
 import Container from '@mui/material/Container'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import AppBar from '~/components/AppBar/AppBar'
 import BoardBar from './BoardBar/BoardBar'
 import BoardContent from './BoardContent/BoardContent'
@@ -8,27 +8,50 @@ import { cloneDeep } from 'lodash'
 import { updateBoardDetailsAPI, updateColumnDetailsAPI, moveCardToDifferentColumnsAPI, deleteColumnDetailAPI } from '~/apis'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchBoardDetailAPI, selectCurrentActiveBoard, updateCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
-import { useParams } from 'react-router-dom'
+import { fetchBoardDetailAPI, selectCurrentActiveBoard, updateCurrentActiveBoard, clearCurrentActiveBoard } from '~/redux/activeBoard/activeBoardSlice'
+import { selectCurrentUser } from '~/redux/user/userSlice'
+import { useParams, useNavigate } from 'react-router-dom'
 import PageLoadingSpinner from '~/components/Loading/PageLoadingSpinner'
 import ActiveCard from '~/components/Modal/ActiveCard/ActiveCard'
 import { selectIsShowModalActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { saveRecentBoard } from '~/utils/boardStorage'
 
 function Board() {
-  // const [board, setBoard] = useState(null)
   const { boardId } = useParams()
-
-
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const board = useSelector(selectCurrentActiveBoard)
+  const currentUser = useSelector(selectCurrentUser)
   const activeModalCard = useSelector(selectIsShowModalActiveCard)
-  // không dùng state của component sẽ sử dụng state Redux
-  useEffect(() => {
-    // sử dinh dispatch để callApi bên activeBoardSlice createAsyncThunk
-    //'6a4b65841f2db783506bbb9d'
-    dispatch(fetchBoardDetailAPI(boardId))
 
-  }, [dispatch])
+  useEffect(() => {
+    // Gọi API lấy dữ liệu board. Nếu không tìm thấy hoặc người dùng bị xóa/không có quyền truy cập, chuyển hướng về trang /boards
+    dispatch(fetchBoardDetailAPI(boardId)).then((res) => {
+      if (res.error) {
+        navigate('/boards')
+      }
+    })
+
+    // Khi unmount khỏi trang board chi tiết, dọn dẹp state board
+    return () => {
+      dispatch(clearCurrentActiveBoard())
+    }
+  }, [dispatch, boardId, navigate])
+
+  // Kiểm tra nếu dữ liệu board đã tải nhưng user hiện tại không còn là owner hoặc member của board
+  useEffect(() => {
+    if (board && currentUser) {
+      const currentUserId = currentUser._id?.toString()
+      const isMemberOrOwner = board.FE_allUsers?.some(u => (u._id || u)?.toString() === currentUserId)
+      if (!isMemberOrOwner) {
+        toast.error('You have been removed from this board!')
+        navigate('/boards')
+      } else {
+        // Lưu board vào danh sách Recent
+        saveRecentBoard(currentUser._id, board)
+      }
+    }
+  }, [board, currentUser, navigate])
 
 
   // Func gọi API và xử lý kéo thả Column tay đổi vị trí trong board

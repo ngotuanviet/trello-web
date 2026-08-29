@@ -59,9 +59,27 @@ export const activeBoardSlice = createSlice({
           })
         }
       }
+    },
+    clearCurrentActiveBoard: (state) => {
+      state.currentActiveBoard = null
+      state.filterCriteria = { keyword: '', memberId: '' }
+    },
+    setFilterCriteria: (state, action) => {
+      state.filterCriteria = { ...state.filterCriteria, ...action.payload }
+    },
+    clearFilterCriteria: (state) => {
+      state.filterCriteria = { keyword: '', memberId: '' }
     }
     // extraReducers: Nơi sử lý dữ liệu bất đồng bộ
   }, extraReducers: (builder) => {
+    builder.addCase(fetchBoardDetailAPI.pending, (state) => {
+      state.currentActiveBoard = null
+      state.filterCriteria = { keyword: '', memberId: '' }
+    })
+    builder.addCase(fetchBoardDetailAPI.rejected, (state) => {
+      state.currentActiveBoard = null
+      state.filterCriteria = { keyword: '', memberId: '' }
+    })
     builder.addCase(fetchBoardDetailAPI.fulfilled, (state, action) => {
       let board = action.payload
       // Thành viên trong board sẽ là gộp lại của 2 mảng owners và members
@@ -85,10 +103,22 @@ export const activeBoardSlice = createSlice({
     })
   }
 })
-export const { updateCurrentActiveBoard, updateCardInBoard } = activeBoardSlice.actions
+export const {
+  updateCurrentActiveBoard,
+  updateCardInBoard,
+  clearCurrentActiveBoard,
+  setFilterCriteria,
+  clearFilterCriteria
+} = activeBoardSlice.actions
+
 // Selectors: Là nơi dành cho các components bên dưới gọi bằng hook useSelector() để lấy dữ liệu từ trong kho redux store ra sử dụng
 export const selectCurrentActiveBoard = (state) => {
   return state.activeBoard.currentActiveBoard
 }
+
+export const selectFilterCriteria = (state) => {
+  return state.activeBoard.filterCriteria || { keyword: '', memberId: '' }
+}
+
 // Cái file này tên là activeBoardSlice NHƯNG chúng ta sẽ export một thứ tên là Reducer
 export default activeBoardSlice.reducer

@@ -9,8 +9,9 @@ import ModeCommentIcon from '@mui/icons-material/ModeComment'
 import AttachmentIcon from '@mui/icons-material/Attachment'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { showModalActiveCard, updateCurrentActiveCard } from '~/redux/activeCard/activeCardSlice'
+import { selectFilterCriteria } from '~/redux/activeBoard/activeBoardSlice'
 
 function CardItem({ card }) {
   const { attributes, listeners, setNodeRef, transform, isDragging, transition } = useSortable({
@@ -18,15 +19,29 @@ function CardItem({ card }) {
     data: { type: 'ACTIVE_DRAG_ITEM_TYPE_CARD', card },
   })
   const dispatch = useDispatch()
+  const filterCriteria = useSelector(selectFilterCriteria)
+
+  const isFilterActive = Boolean(filterCriteria?.keyword?.trim() || filterCriteria?.memberId)
+  let isMatchFilter = true
+  if (isFilterActive && !card?.FE_PlaceholderCard) {
+    const matchKeyword = filterCriteria.keyword?.trim()
+      ? card.title?.toLowerCase().includes(filterCriteria.keyword.trim().toLowerCase())
+      : true
+    const matchMember = filterCriteria.memberId
+      ? card.memberIds?.some(id => (id._id || id)?.toString() === filterCriteria.memberId?.toString())
+      : true
+    isMatchFilter = matchKeyword && matchMember
+  }
+
   const dhdKitCardStyles = {
     /**
      * TouchAction: 'none', // Dành cho sensor default dạng Pointer sensor
      * Nếu sử dụng CSS.Transform như docs sẽ lỗi kiểu stretch
      */
-
     transform: CSS.Translate.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : undefined,
+    opacity: isDragging ? 0.5 : (isFilterActive && !isMatchFilter ? 0.25 : undefined),
+    filter: isFilterActive && !isMatchFilter ? 'grayscale(80%)' : undefined,
     border: isDragging ? '1px solid #2ecc71' : undefined,
   }
   const shouldShowCardActions = () => {
@@ -52,7 +67,7 @@ function CardItem({ card }) {
           boxShadow: '0 1px 1px rgba(0,0,0,0.2)',
           overflow: 'unset',
           display: card?.FE_PlaceholderCard ? 'none' : 'block',
-          border: '1px solid transparent',
+          border: isFilterActive && isMatchFilter ? '1px solid #00bcd4' : '1px solid transparent',
           '&:hover': { borderColor: (theme) => theme.palette.primary.main }
         }}
       >

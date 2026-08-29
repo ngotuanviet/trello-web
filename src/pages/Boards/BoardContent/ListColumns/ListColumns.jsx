@@ -83,12 +83,7 @@ function ListColumns({ columns }) {
         {/* Column */}
 
         {columns?.map((column) => (
-          <>
-
-            <Column key={column._id} column={column} /></>
-
-
-
+          <Column key={column._id} column={column} />
         ))}
 
         <Box

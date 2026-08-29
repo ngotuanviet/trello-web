@@ -35,6 +35,10 @@ export const notificationsSlice = createSlice({
     },
     addNotification: (state, action) => {
       const incomingInvitation = action.payload
+      // Đảm bảo currentNotifications luôn là mảng trước khi unshift
+      if (!Array.isArray(state.currentNotifications)) {
+        state.currentNotifications = []
+      }
       // unshift là thêm phần từ vào đầu mảng, ngược lại với push
       state.currentNotifications.unshift(incomingInvitation)
     }
@@ -42,14 +46,18 @@ export const notificationsSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(fetchInvitationsAPI.fulfilled, (state, action) => {
       let incomingInvitations = action.payload
-      // Đoạn này đảo ngược lại mång invitations nhận được, đơn giản là để hien thị cái mới nhất lên đầ
+      // Đoạn này đảo ngược lại mảng invitations nhận được, đơn giản là để hiển thị cái mới nhất lên đầu
       state.currentNotifications = Array.isArray(incomingInvitations) ? incomingInvitations.reverse() : []
     }),
       builder.addCase(updateBoardInvitationAPI.fulfilled, (state, action) => {
         const incomingInvitation = action.payload
         // Cập nhật lại dữ liệu boardInvitation (bên trong nó sẽ có Status mới sau khi update)
-        const getInvitation = state.currentNotifications.find(i => i._id === incomingInvitation._id)
-        getInvitation.boardInvitation = incomingInvitation.boardInvitation
+        if (Array.isArray(state.currentNotifications)) {
+          const getInvitation = state.currentNotifications.find(i => i._id === incomingInvitation._id)
+          if (getInvitation) {
+            getInvitation.boardInvitation = incomingInvitation.boardInvitation
+          }
+        }
       })
   }
 })

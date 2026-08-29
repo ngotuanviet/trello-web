@@ -46,39 +46,50 @@ function Notifications() {
   // cập nhật trạng thời lời mời
   const updateBoardInvitation = (status, invitationId) => {
     dispatch(updateBoardInvitationAPI({ status, invitationId })).then((res) => {
-      if (res.payload.boardInvitation.status === BOARD_INVITATION_STATUS.ACCEPTED) {
+      if (res.payload?.boardInvitation?.status === BOARD_INVITATION_STATUS.ACCEPTED) {
         navigate(`/boards/${res.payload.boardInvitation.boardId}`)
       }
     })
   }
 
   useEffect(() => {
-    dispatch(fetchInvitationsAPI())
-    // Tạo một cái func xử lý khi nhận được sự kiện real-time, docs hướng dẫn
-    // https://socket.io/how-to/use-with-react
+    dispatch(fetchInvitationsAPI()).then((res) => {
+      // Khi load trang lần đầu, nếu có lời mời đang ở trạng thái PENDING thì hiện chấm chuông thông báo
+      if (Array.isArray(res.payload) && res.payload.some(i => i.boardInvitation?.status === BOARD_INVITATION_STATUS.PENDING)) {
+        setNewNotification(true)
+      }
+    })
+
+    // Tạo một func xử lý khi nhận được sự kiện real-time từ socket
     const onReceiveNewInvitation = (invitation) => {
-      // Nếu thằng user đang đăng nhập hiện tại trong redux chính là thằng invitee trong bån ghi invitation
-      if (invitation.inviteeId === currentUser._id) {
-        //B1 thêm bản ghi invitation mới trong redux
+      // Kiểm tra an toàn: nếu user hiện tại là người được mời (invitee)
+      const currentUserId = currentUser?._id?.toString()
+      const inviteeId = (invitation?.inviteeId || invitation?.invitee?._id)?.toString()
+
+      if (currentUserId && inviteeId === currentUserId) {
+        // B1: thêm bản ghi invitation mới vào redux
         dispatch(addNotification(invitation))
-        //B2 Cập nhật trạng trái đang có thông báo đến
+        // B2: Cập nhật trạng thái chuông có thông báo mới đến
         setNewNotification(true)
       }
     }
-    // Lắng nghe một cái sự kiện real-time có tên là BE_USER_INVITED_TO_BOARD từ phía server gửi về
+
+    // Lắng nghe sự kiện real-time BE_USER_INVITED_TO_BOARD từ phía server gửi về
     socketIoInstance.on('BE_USER_INVITED_TO_BOARD', onReceiveNewInvitation)
-    // clean up sự kiện để ngăn chặn việc bị đăng ký lặp lại sự kiện https://socket.io/how-to/use-with-react#cleanup
+
+    // Clean up sự kiện để tránh lặp lại listener
     return () => {
       socketIoInstance.off('BE_USER_INVITED_TO_BOARD', onReceiveNewInvitation)
     }
-  }, [dispatch, currentUser._id])
+  }, [dispatch, currentUser?._id])
+
   return (
-    <Box >
+    <Box>
       <Tooltip title="Notifications">
         <Badge
           color="warning"
-          variant={newNotification ? "dot" : "none"}
-
+          variant="dot"
+          invisible={!newNotification}
           sx={{ cursor: 'pointer' }}
           id="basic-button-open-notification"
           aria-controls={open ? 'basic-notification-drop-down' : undefined}
@@ -88,7 +99,6 @@ function Notifications() {
         >
           <NotificationsNoneIcon sx={{
             color: newNotification ? 'yellow' : 'white'
-
           }} />
         </Badge>
       </Tooltip>
@@ -114,12 +124,12 @@ function Notifications() {
                 {/* Nội dung của thông báo */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Box><GroupAddIcon fontSize="small" /></Box>
-                  <Box><strong>{notification.inviter.displayName}</strong> had invited you to join the board <strong>{notification.board.title}</strong></Box>
+                  <Box><strong>{notification.inviter?.displayName}</strong> had invited you to join the board <strong>{notification.board?.title}</strong></Box>
                 </Box>
 
                 {/* Khi Status của thông báo này là PENDING thì sẽ hiện 2 Button */}
                 {
-                  notification.boardInvitation.status === BOARD_INVITATION_STATUS.PENDING && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>
+                  notification.boardInvitation?.status === BOARD_INVITATION_STATUS.PENDING && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>
                     <Button
                       className="interceptor-loading"
                       type="submit"
@@ -143,21 +153,19 @@ function Notifications() {
                   </Box>
                 }
 
-
                 {/* Khi Status của thông báo này là ACCEPTED hoặc REJECTED thì sẽ hiện thông tin đó lên */}
-
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>
-                  {notification.boardInvitation.status === BOARD_INVITATION_STATUS.ACCEPTED && <Chip icon={<DoneIcon />} label="Accepted" color="success" size="small" />
+                  {notification.boardInvitation?.status === BOARD_INVITATION_STATUS.ACCEPTED && <Chip icon={<DoneIcon />} label="Accepted" color="success" size="small" />
                   }
                   {
-                    notification.boardInvitation.status === BOARD_INVITATION_STATUS.REJECTED && <Chip icon={<NotInterestedIcon />} label="Rejected" size="small" />
+                    notification.boardInvitation?.status === BOARD_INVITATION_STATUS.REJECTED && <Chip icon={<NotInterestedIcon />} label="Rejected" size="small" />
                   }
                 </Box>
 
                 {/* Thời gian của thông báo */}
                 <Box sx={{ textAlign: 'right' }}>
                   <Typography variant="span" sx={{ fontSize: '13px' }}>
-                    {moment(notification.createAt).format('llll')}
+                    {moment(notification.createdAt || notification.createAt).format('llll')}
                   </Typography>
                 </Box>
               </Box>
