@@ -351,7 +351,7 @@ function Column({ column }) {
                 borderColor: (theme) => theme.palette.success.main,
                 '&:hover': { bgColor: (theme) => theme.palette.success.contrastText.main }
               }} onClick={handleAddNewCard}>Add</Button>
-              <CloseIcon onClick={() => setToggleNewCard(!toggleNewCard)} fontSize='small' sx={{ color: 'white', cursor: 'pointer', color: (theme) => theme.palette.warning.light }} />
+              <CloseIcon onClick={() => setToggleNewCard(!toggleNewCard)} fontSize='small' sx={{ cursor: 'pointer', color: (theme) => theme.palette.warning.light }} />
             </Box>
           </Box>
 
