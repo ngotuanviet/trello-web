@@ -1,9 +1,12 @@
 let apiRoot = ''
 if (process.env.BUILD_MODE === 'dev') {
-  apiRoot = 'http://localhost:3000'
+  apiRoot = 'http://localhost:8017'
 }
 if (process.env.BUILD_MODE === 'production') {
-  apiRoot = import.meta.env.VITE_URL_PRODUC
+  apiRoot = import.meta.env.VITE_URL_PRODUC || 'https://trello.ngotuanviet.id.vn'
+  if (apiRoot && !apiRoot.startsWith('http://') && !apiRoot.startsWith('https://')) {
+    apiRoot = `https://${apiRoot}`
+  }
 }
 export const DEFAULT_PAGE = 1
 export const DEFAULT_ITEMS_PER_PAGE = 12
